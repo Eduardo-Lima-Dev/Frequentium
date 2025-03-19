@@ -24,7 +24,7 @@ const UploadJsonModal: React.FC<UploadJsonModalProps> = ({ isOpen, closeModal, h
 
     return (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-            <div className="bg-gray-800 p-6 rounded-lg w-1/2 relative"> {/* Aumentei a largura do modal para 50% */}
+            <div className="bg-gray-800 p-6 rounded-lg relative">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl text-white">Upload de Arquivo JSON</h2>
                     <button

@@ -79,14 +79,14 @@ const Dashboard: React.FC = () => {
             <Header />
             <div className="p-6 text-center">
                 <h1 className="text-4xl mb-4">Frequências Meu Racha</h1>
-                <h2 className="text-lg text-gray-400 mt-2 mb-6">Os alunos que jogaram no racha</h2>
+                <h2 className="text-lg text-gray-400 mt-2 mb-6">Os jogadores que participaram do racha</h2>
 
                 <div className="flex flex-wrap justify-center gap-4 mb-6">
                     <button
                         onClick={openModal}
                         className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
                     >
-                        Adicionar Novo Aluno
+                        Adicionar Novo Jogador
                     </button>
                     <button
                         onClick={openUploadModal}
