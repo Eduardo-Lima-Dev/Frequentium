@@ -1,34 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { createPlayer, updatePlayer } from '../services/api/playerService'; 
+
+interface Player {
+    id: number;
+    name: string;
+    registrationNumber: string;
+    horas: number;
+}
 
 interface AddPlayerModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    addPlayer: (registrationNumber: string, name: string) => void; // Modificado para refletir a estrutura do backend
-    editingPlayer: { name: string; registrationNumber: string } | null; 
+    editingPlayer: Player | null;
+    addPlayer: (name: string, registrationNumber: string) => void;
+    setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
 }
 
 const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
     isOpen,
     closeModal,
-    addPlayer,
     editingPlayer,
+    setPlayers,
 }) => {
     const [name, setName] = useState('');
     const [registrationNumber, setRegistrationNumber] = useState('');
+    const [loading, setLoading] = useState(false); 
 
     useEffect(() => {
         if (editingPlayer) {
             setName(editingPlayer.name);
             setRegistrationNumber(editingPlayer.registrationNumber);
         }
-    }, [editingPlayer]);  
+    }, [editingPlayer]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // No backend, o campo `horas` sempre começa com 0, então não precisa ser enviado
-        addPlayer(registrationNumber, name); // Chamando a função `addPlayer` sem `horas`
-        closeModal(); 
+        setLoading(true); 
+
+        try {
+            let updatedPlayer: Player;
+            if (editingPlayer) {
+                updatedPlayer = await updatePlayer(editingPlayer.id, name, registrationNumber, editingPlayer.horas);
+                setPlayers(prevPlayers => 
+                    prevPlayers.map(player => player.id === updatedPlayer.id ? updatedPlayer : player)
+                );
+            } else {
+                updatedPlayer = await createPlayer(name, registrationNumber);
+                setPlayers(prevPlayers => [...prevPlayers, updatedPlayer]);
+            }
+            console.log('Jogador salvo com sucesso', updatedPlayer);
+            closeModal(); 
+        } catch (error) {
+            console.error('Erro ao salvar jogador', error);
+        } finally {
+            setLoading(false); 
+        }
     };
 
     if (!isOpen) return null;
@@ -37,7 +64,7 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
             <div className="bg-gray-800 p-6 rounded-lg w-1/2 relative">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl text-white">Adicionar Novo Aluno</h2>
+                    <h2 className="text-2xl text-white">{editingPlayer ? 'Editar Jogador' : 'Adicionar Novo Aluno'}</h2>
                     <button
                         onClick={closeModal}
                         className="text-white text-2xl ml-4"
@@ -78,8 +105,9 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                         <button
                             type="submit"
                             className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                            disabled={loading} 
                         >
-                            {editingPlayer ? 'Atualizar' : 'Adicionar'}
+                            {loading ? 'Processando...' : (editingPlayer ? 'Atualizar' : 'Adicionar')}
                         </button>
                     </div>
                 </form>

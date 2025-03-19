@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { deletePlayer } from '../services/api/playerService'; 
+import DeletePlayerModal from './DeletePlayerModal'; 
 
 interface Player {
     id: number;
@@ -10,10 +12,34 @@ interface Player {
 
 interface PlayerTableProps {
     players: Player[];
-    editPlayer: (player: Player) => void; 
+    editPlayer: (player: Player) => void;
+    setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
 }
 
-const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer }) => {
+const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer, setPlayers }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isDeleting, setIsDeleting] = useState(false); 
+    const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null); 
+    const [isModalOpen, setIsModalOpen] = useState(false); 
+
+    const handleDeleteClick = (player: Player) => {
+        setPlayerToDelete(player); 
+        setIsModalOpen(true); 
+    };
+
+    const handleDelete = async (playerId: number) => {
+        try {
+            setIsDeleting(true); 
+            await deletePlayer(playerId); 
+            setPlayers(prevPlayers => prevPlayers.filter(player => player.id !== playerId)); 
+            console.log('Jogador excluído com sucesso');
+        } catch (error) {
+            console.error('Erro ao excluir jogador', error);
+        } finally {
+            setIsDeleting(false); 
+        }
+    };
+
     return (
         <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-md w-full">
             <table className="table-auto min-w-full mx-auto table-fixed">
@@ -32,12 +58,12 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer }) => {
                             <tr key={player.id} className="border-b border-gray-700">
                                 <td className="px-6 py-4 text-left flex items-center">
                                     <div className="w-8 h-8 rounded-full bg-gray-600 text-white flex items-center justify-center mr-4">
-                                        {playerInitial}  {/* Inicial do nome do jogador */}
+                                        {playerInitial}
                                     </div>
                                     {player.name}
                                 </td>
                                 <td className="px-6 py-4 text-center">{player.registrationNumber}</td>
-                                <td className="px-6 py-4 text-center">{player.horas}</td> {/* Exibindo o campo 'horas' */}
+                                <td className="px-6 py-4 text-center">{player.horas}</td> 
                                 <td className="px-6 py-4 text-center">
                                     <button
                                         onClick={() => editPlayer(player)} 
@@ -46,7 +72,11 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer }) => {
                                     >
                                         <FaEdit />
                                     </button>
-                                    <button className="text-red-500" title="Excluir">
+                                    <button
+                                        onClick={() => handleDeleteClick(player)} 
+                                        className="text-red-500"
+                                        title="Excluir"
+                                    >
                                         <FaTrashAlt />
                                     </button>
                                 </td>
@@ -55,6 +85,13 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer }) => {
                     })}
                 </tbody>
             </table>
+
+            <DeletePlayerModal
+                isOpen={isModalOpen}
+                closeModal={() => setIsModalOpen(false)}
+                playerToDelete={playerToDelete}
+                onDelete={handleDelete}
+            />
         </div>
     );
 };

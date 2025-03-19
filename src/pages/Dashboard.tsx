@@ -4,7 +4,7 @@ import PlayerTable from '../components/PlayerTable';
 import AddPlayerModal from '../components/AddPlayerModal';
 import UploadJsonModal from '../components/UploadJsonModal';
 import Pagination from '../components/Pagination';
-import { findAllPlayers } from '../services/api/playerService';
+import { findAllPlayers, createPlayer } from '../services/api/playerService';
 
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +18,7 @@ const Dashboard: React.FC = () => {
         id: number;
         name: string;
         registrationNumber: string;
-        horas: number;  // Adicionando o campo horas, conforme o backend
+        horas: number; 
     }
 
     const openModal = () => setIsModalOpen(true);
@@ -27,14 +27,17 @@ const Dashboard: React.FC = () => {
     const openUploadModal = () => setIsUploadModalOpen(true);
     const closeUploadModal = () => setIsUploadModalOpen(false);
 
-    const addPlayer = (name: string, registrationNumber: string) => {
-        const newPlayer = {
-            id: players.length + 1,
-            name,
-            registrationNumber,
-            horas: 0,  // Inicializando as horas como 0
-        };
-        setPlayers([...players, newPlayer]);
+    const addPlayer = async (name: string, registrationNumber: string) => {
+        try {
+            const newPlayer = await createPlayer(name, registrationNumber);
+            if (newPlayer) {
+                console.log('Jogador adicionado com sucesso', newPlayer);
+                setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
+                closeModal();
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar jogador', error);
+        }
     };
 
     const handleFileUpload = (file: File) => {
@@ -60,12 +63,11 @@ const Dashboard: React.FC = () => {
             try {
                 const data = await findAllPlayers();
                 console.log('Jogadores recebidos do backend:', data);
-                // Mapeando os dados do backend para o formato esperado
                 const formattedPlayers = data.map((player: { id: number; nome: string; matricula: string; horas?: number }) => ({
                     id: player.id,
                     name: player.nome,
                     registrationNumber: player.matricula,
-                    horas: player.horas || 0,  // Garantir que horas tenha valor, caso contrário usa 0
+                    horas: player.horas || 0,
                 }));
                 setPlayers(formattedPlayers);
             } catch (error) {
@@ -105,6 +107,7 @@ const Dashboard: React.FC = () => {
                 <PlayerTable 
                     players={currentPlayers} 
                     editPlayer={editPlayer} 
+                    setPlayers={setPlayers}
                 />
 
                 <Pagination
@@ -120,7 +123,9 @@ const Dashboard: React.FC = () => {
                 closeModal={closeModal}
                 addPlayer={addPlayer}
                 editingPlayer={editingPlayer}  
+                setPlayers={setPlayers} 
             />
+            
             <UploadJsonModal
                 isOpen={isUploadModalOpen}
                 closeModal={closeUploadModal}
