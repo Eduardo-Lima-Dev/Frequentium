@@ -13,48 +13,45 @@ interface AddPlayerModalProps {
     isOpen: boolean;
     closeModal: () => void;
     editingPlayer: Player | null;
-    addPlayer: (name: string, registrationNumber: string) => void;
-    setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
+    onSuccess: () => Promise<void>;
 }
 
 const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
     isOpen,
     closeModal,
     editingPlayer,
-    setPlayers,
+    onSuccess
 }) => {
     const [name, setName] = useState('');
     const [registrationNumber, setRegistrationNumber] = useState('');
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (editingPlayer) {
             setName(editingPlayer.name);
             setRegistrationNumber(editingPlayer.registrationNumber);
+        } else {
+            setName('');
+            setRegistrationNumber('');
         }
     }, [editingPlayer]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true); 
+        setLoading(true);
 
         try {
-            let updatedPlayer: Player;
             if (editingPlayer) {
-                updatedPlayer = await updatePlayer(editingPlayer.id, name, registrationNumber, editingPlayer.horas);
-                setPlayers(prevPlayers => 
-                    prevPlayers.map(player => player.id === updatedPlayer.id ? updatedPlayer : player)
-                );
+                await updatePlayer(editingPlayer.id, name, registrationNumber, editingPlayer.horas);
             } else {
-                updatedPlayer = await createPlayer(name, registrationNumber);
-                setPlayers(prevPlayers => [...prevPlayers, updatedPlayer]);
+                await createPlayer(name, registrationNumber);
             }
-            console.log('Jogador salvo com sucesso', updatedPlayer);
-            closeModal(); 
+            await onSuccess();
+            closeModal();
         } catch (error) {
             console.error('Erro ao salvar jogador', error);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -105,7 +102,7 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                         <button
                             type="submit"
                             className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                            disabled={loading} 
+                            disabled={loading}
                         >
                             {loading ? 'Processando...' : (editingPlayer ? 'Atualizar' : 'Adicionar')}
                         </button>

@@ -4,7 +4,7 @@ import PlayerTable from '../components/PlayerTable';
 import AddPlayerModal from '../components/AddPlayerModal';
 import UploadJsonModal from '../components/UploadJsonModal';
 import Pagination from '../components/Pagination';
-import { findAllPlayers, createPlayer } from '../services/api/playerService';
+import { findAllPlayers } from '../services/api/playerService';
 
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,23 +22,13 @@ const Dashboard: React.FC = () => {
     }
 
     const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setEditingPlayer(null);
+    };
 
     const openUploadModal = () => setIsUploadModalOpen(true);
     const closeUploadModal = () => setIsUploadModalOpen(false);
-
-    const addPlayer = async (name: string, registrationNumber: string) => {
-        try {
-            const newPlayer = await createPlayer(name, registrationNumber);
-            if (newPlayer) {
-                console.log('Jogador adicionado com sucesso', newPlayer);
-                setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
-                closeModal();
-            }
-        } catch (error) {
-            console.error('Erro ao adicionar jogador', error);
-        }
-    };
 
     const handleFileUpload = (file: File) => {
         const reader = new FileReader();
@@ -58,29 +48,31 @@ const Dashboard: React.FC = () => {
         openModal();
     };
 
-    useEffect(() => {
-        const fetchPlayers = async () => {
-            try {
-                const data = await findAllPlayers();
-                console.log('Jogadores recebidos do backend:', data);
-                const formattedPlayers = data.map((player: { id: number; nome: string; matricula: string; horas?: number }) => ({
-                    id: player.id,
-                    name: player.nome,
-                    registrationNumber: player.matricula,
-                    horas: player.horas || 0,
-                }));
-                setPlayers(formattedPlayers);
-            } catch (error) {
-                console.error('Erro ao buscar jogadores:', error);
-            }
-        };
+    const fetchPlayers = async () => {
+        try {
+            const data = await findAllPlayers();
+            console.log('Jogadores recebidos do backend:', data);
+            const formattedPlayers = data.map((player: { id: number; nome: string; matricula: string; horas?: number }) => ({
+                id: player.id,
+                name: player.nome,
+                registrationNumber: player.matricula,
+                horas: player.horas || 0,
+            }));
+            setPlayers(formattedPlayers);
+        } catch (error) {
+            console.error('Erro ao buscar jogadores:', error);
+        }
+    };
 
+    useEffect(() => {
         fetchPlayers();
     }, []);
 
     const indexOfLastPlayer = currentPage * playersPerPage;
     const indexOfFirstPlayer = indexOfLastPlayer - playersPerPage;
-    const currentPlayers = players.slice(indexOfFirstPlayer, indexOfLastPlayer);
+    const currentPlayers = [...players]
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+        .slice(indexOfFirstPlayer, indexOfLastPlayer);
 
     return (
         <div className="bg-gray-900 text-white min-h-screen">
@@ -121,9 +113,8 @@ const Dashboard: React.FC = () => {
             <AddPlayerModal
                 isOpen={isModalOpen}
                 closeModal={closeModal}
-                addPlayer={addPlayer}
-                editingPlayer={editingPlayer}  
-                setPlayers={setPlayers} 
+                editingPlayer={editingPlayer}
+                onSuccess={fetchPlayers}
             />
             
             <UploadJsonModal
