@@ -4,13 +4,15 @@ import PlayerTable from '../components/PlayerTable';
 import AddPlayerModal from '../components/AddPlayerModal';
 import UploadJsonModal from '../components/UploadJsonModal';
 import Pagination from '../components/Pagination';
-import { findAllPlayers } from '../services/api/playerService';
+import { findAllPlayers, createManyPlayers } from '../services/api/playerService';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [players, setPlayers] = useState<Player[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
     const playersPerPage = 10;
     const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
 
@@ -30,16 +32,58 @@ const Dashboard: React.FC = () => {
     const openUploadModal = () => setIsUploadModalOpen(true);
     const closeUploadModal = () => setIsUploadModalOpen(false);
 
-    const handleFileUpload = (file: File) => {
+    const handleFileUpload = async (file: File) => {
+        setIsLoading(true);
         const reader = new FileReader();
-        reader.onload = () => {
+        
+        reader.onload = async () => {
             try {
-                const data = JSON.parse(reader.result as string);
-                console.log('Arquivo JSON carregado:', data);
+                const fileContent = reader.result as string;
+                console.log('Conteúdo do arquivo:', fileContent);
+                
+                const players = JSON.parse(fileContent);
+                console.log('Dados do JSON parseados:', players);
+                console.log('Quantidade de jogadores no JSON:', players.length);
+                
+                if (!Array.isArray(players)) {
+                    toast.error('O arquivo JSON deve conter um array de jogadores');
+                    return;
+                }
+
+                const isValidFormat = players.every(player => 
+                    player.nome && 
+                    (player.matricula || player.matricula === 0)
+                );
+
+                if (!isValidFormat) {
+                    toast.error('Formato inválido. Cada jogador deve ter nome e matrícula');
+                    return;
+                }
+
+                const result = await createManyPlayers(players);
+                console.log('Resultado da criação em lote:', result);
+                
+                if (result) {
+                    await fetchPlayers();
+                    closeUploadModal();
+                    toast.success(`${result.length} jogadores foram adicionados com sucesso!`);
+                } else {
+                    toast.error('Erro ao adicionar jogadores. Verifique o console para mais detalhes.');
+                }
             } catch (error) {
-                console.error('Erro ao processar o arquivo JSON', error);
+                console.error('Erro ao processar o arquivo JSON ou criar jogadores:', error);
+                toast.error('Erro ao processar o arquivo. Verifique se o formato está correto.');
+            } finally {
+                setIsLoading(false);
             }
         };
+
+        reader.onerror = () => {
+            console.error('Erro ao ler o arquivo');
+            toast.error('Erro ao ler o arquivo');
+            setIsLoading(false);
+        };
+
         reader.readAsText(file);
     };
 
@@ -49,6 +93,7 @@ const Dashboard: React.FC = () => {
     };
 
     const fetchPlayers = async () => {
+        setIsLoading(true);
         try {
             const data = await findAllPlayers();
             console.log('Jogadores recebidos do backend:', data);
@@ -61,6 +106,8 @@ const Dashboard: React.FC = () => {
             setPlayers(formattedPlayers);
         } catch (error) {
             console.error('Erro ao buscar jogadores:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -76,6 +123,24 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="bg-gray-900 text-white min-h-screen">
+            <Toaster 
+                position="top-right"
+                toastOptions={{
+                    success: {
+                        style: {
+                            background: '#059669',
+                            color: 'white',
+                        },
+                    },
+                    error: {
+                        style: {
+                            background: '#DC2626',
+                            color: 'white',
+                        },
+                    },
+                    duration: 3000,
+                }}
+            />
             <Header />
             <div className="p-6 text-center">
                 <h1 className="text-4xl mb-4">Frequências Meu Racha</h1>
@@ -100,6 +165,7 @@ const Dashboard: React.FC = () => {
                     players={currentPlayers} 
                     editPlayer={editPlayer} 
                     setPlayers={setPlayers}
+                    isLoading={isLoading}
                 />
 
                 <Pagination

@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/';
 
-// Função para buscar todos os jogadores
 export const findAllPlayers = async () => {
     try {
         console.log('Buscando os jogadores');
@@ -15,7 +14,6 @@ export const findAllPlayers = async () => {
     }
 };
 
-// Função para buscar um jogador pelo ID
 export const findPlayerById = async (id: string | number) => {
     try {
         console.log(`Buscando o jogador com ID ${id}`);
@@ -28,7 +26,6 @@ export const findPlayerById = async (id: string | number) => {
     }
 };
 
-// Função para criar um novo jogador
 export const createPlayer = async (nome: string, matricula: string) => {
     try {
         console.log('Criando um novo jogador');
@@ -41,7 +38,6 @@ export const createPlayer = async (nome: string, matricula: string) => {
     }
 };
 
-// Função para atualizar um jogador
 export const updatePlayer = async (id: string | number, nome: string, matricula: string, horas: number) => {
     try {
         console.log(`Atualizando o jogador com ID ${id}`);
@@ -54,7 +50,6 @@ export const updatePlayer = async (id: string | number, nome: string, matricula:
     }
 };
 
-// Função para excluir um jogador
 export const deletePlayer = async (id: string | number) => {
     try {
         console.log(`Excluindo o jogador com ID ${id}`);
@@ -63,6 +58,38 @@ export const deletePlayer = async (id: string | number) => {
         return response.data;
     } catch (error) {
         console.error(`Erro ao excluir o jogador com ID ${id}`, error);
+        return null;
+    }
+};
+
+export const createManyPlayers = async (players: { nome: string; matricula: string | number }[]) => {
+    try {
+        console.log(`Tentando criar ${players.length} jogadores`);
+        console.log('Dados enviados:', players);
+
+        const createdPlayers = [];
+        for (const player of players) {
+            try {
+                const response = await axios.post(`${API_URL}jogadores`, {
+                    nome: player.nome,
+                    matricula: String(player.matricula)
+                });
+                if (response.data) {
+                    createdPlayers.push(response.data);
+                }
+            } catch (error) {
+                console.error(`Erro ao criar jogador ${player.nome}:`, error);
+            }
+        }
+
+        console.log(`${createdPlayers.length} jogadores criados com sucesso`);
+        return createdPlayers;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Erro ao criar múltiplos jogadores:', error.response?.data || error.message);
+        } else {
+            console.error('Erro ao criar múltiplos jogadores:', error);
+        }
         return null;
     }
 };
