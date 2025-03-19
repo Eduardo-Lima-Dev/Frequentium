@@ -19,15 +19,15 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer }) => {
             <table className="table-auto min-w-full mx-auto table-fixed">
                 <thead className="bg-gray-700 text-left">
                     <tr>
-                        <th className="px-6 py-4 text-center">Aluno</th>
+                        <th className="px-6 py-4 text-center">Jogador</th>
                         <th className="px-6 py-4 text-center">Matrícula</th>
-                        <th className="px-6 py-4 text-center">Data</th>
+                        <th className="px-6 py-4 text-center">Horas</th>
                         <th className="px-6 py-4 text-center">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {players.map((player) => {
-                        const playerInitial = player.name.charAt(0).toUpperCase(); // Inicial do nome
+                        const playerInitial = player.name.charAt(0).toUpperCase(); 
                         return (
                             <tr key={player.id} className="border-b border-gray-700">
                                 <td className="px-6 py-4 text-left flex items-center">

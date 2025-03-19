@@ -8,7 +8,7 @@ import Pagination from '../components/Pagination';
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const [players, setPlayers] = useState<any[]>([
+    const [players, setPlayers] = useState<Player[]>([
         { id: 1, name: 'Lucas Silva', registrationNumber: '123456', date: 'Jan 1, 2022' },
         { id: 2, name: 'Maria Oliveira', registrationNumber: '123457', date: 'Jan 2, 2022' },
         { id: 3, name: 'Carlos Souza', registrationNumber: '123458', date: 'Jan 3, 2022' },
@@ -27,7 +27,14 @@ const Dashboard: React.FC = () => {
     ]);
     const [currentPage, setCurrentPage] = useState(1);
     const playersPerPage = 10;
-    const [editingPlayer, setEditingPlayer] = useState<any | null>(null); 
+    interface Player {
+        id: number;
+        name: string;
+        registrationNumber: string;
+        date: string;
+    }
+
+    const [editingPlayer, setEditingPlayer] = useState<Player | null>(null); 
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
@@ -58,7 +65,7 @@ const Dashboard: React.FC = () => {
         reader.readAsText(file);
     };
 
-    const editPlayer = (player: any) => {
+    const editPlayer = (player: Player) => {
         setEditingPlayer(player);  
         openModal();  
     };

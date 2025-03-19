@@ -1,0 +1,102 @@
+# Teste GET /jogos
+GET http://localhost:3000/jogos
+Accept: application/json
+
+###
+
+# Teste GET /jogos/{id}
+GET http://localhost:3000/jogos/1
+Accept: application/json
+
+###
+
+# Teste POST /jogos (Criar um novo jogo)
+POST http://localhost:3000/jogos
+Content-Type: application/json
+{
+  "data": "2025-03-01",
+  "duracao": 90
+}
+
+###
+
+# Teste PUT /jogos/{id} (Atualizar um jogo existente)
+PUT http://localhost:3000/jogos/1
+Content-Type: application/json
+{
+  "data": "2025-03-01",
+  "duracao": 120
+}
+
+###
+
+# Teste DELETE /jogos/{id} (Excluir um jogo)
+DELETE http://localhost:3000/jogos/1
+Accept: application/json
+
+###
+
+# Teste GET /jogadores
+GET http://localhost:3000/jogadores
+Accept: application/json
+
+###
+
+# Teste GET /jogadores/{id}
+GET http://localhost:3000/jogadores/1
+Accept: application/json
+
+###
+
+# Teste POST /jogadores (Criar um novo jogador)
+POST http://localhost:3000/jogadores
+Content-Type: application/json
+{
+  "nome": "Carlos Souza",
+  "matricula": "123456"
+}
+
+###
+
+# Teste PUT /jogadores/{id} (Atualizar um jogador existente)
+PUT http://localhost:3000/jogadores/1
+Content-Type: application/json
+{
+  "nome": "Carlos Souza",
+  "matricula": "123456",
+  "horas": 5
+}
+
+###
+
+# Teste DELETE /jogadores/{id} (Excluir um jogador)
+DELETE http://localhost:3000/jogadores/1
+Accept: application/json
+
+###
+
+# Teste GET /frequencia
+GET http://localhost:3000/frequencia
+Accept: application/json
+
+###
+
+# Teste GET /frequencia/{id}
+GET http://localhost:3000/frequencia/1
+Accept: application/json
+
+###
+
+# Teste POST /frequencia (Criar uma nova frequência)
+POST http://localhost:3000/frequencia
+Content-Type: application/json
+{
+  "jogoId": 1,
+  "jogadorId": 2
+}
+
+###
+
+# Teste DELETE /frequencia/{id} (Excluir uma frequência)
+DELETE http://localhost:3000/frequencia/1
+Accept: application/json
