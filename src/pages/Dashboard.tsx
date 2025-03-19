@@ -1,40 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import PlayerTable from '../components/PlayerTable';
 import AddPlayerModal from '../components/AddPlayerModal';
 import UploadJsonModal from '../components/UploadJsonModal';
 import Pagination from '../components/Pagination';
+import { findAllPlayers } from '../services/api/playerService';
 
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const [players, setPlayers] = useState<Player[]>([
-        { id: 1, name: 'Lucas Silva', registrationNumber: '123456', date: 'Jan 1, 2022' },
-        { id: 2, name: 'Maria Oliveira', registrationNumber: '123457', date: 'Jan 2, 2022' },
-        { id: 3, name: 'Carlos Souza', registrationNumber: '123458', date: 'Jan 3, 2022' },
-        { id: 4, name: 'Fernanda Costa', registrationNumber: '123459', date: 'Jan 4, 2022' },
-        { id: 5, name: 'Paulo Santos', registrationNumber: '123460', date: 'Jan 5, 2022' },
-        { id: 6, name: 'Ana Rodrigues', registrationNumber: '123461', date: 'Jan 6, 2022' },
-        { id: 7, name: 'João Pereira', registrationNumber: '123462', date: 'Jan 7, 2022' },
-        { id: 8, name: 'Rita Lima', registrationNumber: '123463', date: 'Jan 8, 2022' },
-        { id: 9, name: 'Juliana Almeida', registrationNumber: '123464', date: 'Jan 9, 2022' },
-        { id: 10, name: 'Eduardo Costa', registrationNumber: '123465', date: 'Jan 10, 2022' },
-        { id: 11, name: 'Gabriela Rocha', registrationNumber: '123466', date: 'Jan 11, 2022' },
-        { id: 12, name: 'Ricardo Lima', registrationNumber: '123467', date: 'Jan 12, 2022' },
-        { id: 13, name: 'Daniela Pereira', registrationNumber: '123468', date: 'Jan 13, 2022' },
-        { id: 14, name: 'Felipe Martins', registrationNumber: '123469', date: 'Jan 14, 2022' },
-        { id: 15, name: 'Mariana Souza', registrationNumber: '123470', date: 'Jan 15, 2022' },
-    ]);
+    const [players, setPlayers] = useState<Player[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const playersPerPage = 10;
+    const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+
     interface Player {
         id: number;
         name: string;
         registrationNumber: string;
-        date: string;
+        horas: number;  // Adicionando o campo horas, conforme o backend
     }
-
-    const [editingPlayer, setEditingPlayer] = useState<Player | null>(null); 
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
@@ -42,12 +27,12 @@ const Dashboard: React.FC = () => {
     const openUploadModal = () => setIsUploadModalOpen(true);
     const closeUploadModal = () => setIsUploadModalOpen(false);
 
-    const addPlayer = (name: string, registrationNumber: string, date: string) => {
+    const addPlayer = (name: string, registrationNumber: string) => {
         const newPlayer = {
             id: players.length + 1,
             name,
             registrationNumber,
-            date,
+            horas: 0,  // Inicializando as horas como 0
         };
         setPlayers([...players, newPlayer]);
     };
@@ -66,9 +51,30 @@ const Dashboard: React.FC = () => {
     };
 
     const editPlayer = (player: Player) => {
-        setEditingPlayer(player);  
-        openModal();  
+        setEditingPlayer(player);
+        openModal();
     };
+
+    useEffect(() => {
+        const fetchPlayers = async () => {
+            try {
+                const data = await findAllPlayers();
+                console.log('Jogadores recebidos do backend:', data);
+                // Mapeando os dados do backend para o formato esperado
+                const formattedPlayers = data.map((player: { id: number; nome: string; matricula: string; horas?: number }) => ({
+                    id: player.id,
+                    name: player.nome,
+                    registrationNumber: player.matricula,
+                    horas: player.horas || 0,  // Garantir que horas tenha valor, caso contrário usa 0
+                }));
+                setPlayers(formattedPlayers);
+            } catch (error) {
+                console.error('Erro ao buscar jogadores:', error);
+            }
+        };
+
+        fetchPlayers();
+    }, []);
 
     const indexOfLastPlayer = currentPage * playersPerPage;
     const indexOfFirstPlayer = indexOfLastPlayer - playersPerPage;

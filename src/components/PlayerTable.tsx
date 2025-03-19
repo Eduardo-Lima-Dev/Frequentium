@@ -5,7 +5,7 @@ interface Player {
     id: number;
     name: string;
     registrationNumber: string;
-    date: string;
+    horas: number; 
 }
 
 interface PlayerTableProps {
@@ -37,7 +37,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer }) => {
                                     {player.name}
                                 </td>
                                 <td className="px-6 py-4 text-center">{player.registrationNumber}</td>
-                                <td className="px-6 py-4 text-center">{player.date}</td>
+                                <td className="px-6 py-4 text-center">{player.horas}</td> {/* Exibindo o campo 'horas' */}
                                 <td className="px-6 py-4 text-center">
                                     <button
                                         onClick={() => editPlayer(player)} 

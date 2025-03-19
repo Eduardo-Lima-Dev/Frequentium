@@ -4,8 +4,8 @@ import { FaTimes } from 'react-icons/fa';
 interface AddPlayerModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    addPlayer: (name: string, registrationNumber: string, date: string) => void;
-    editingPlayer: any | null; 
+    addPlayer: (registrationNumber: string, name: string) => void; // Modificado para refletir a estrutura do backend
+    editingPlayer: { name: string; registrationNumber: string } | null; 
 }
 
 const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
@@ -16,19 +16,18 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
 }) => {
     const [name, setName] = useState('');
     const [registrationNumber, setRegistrationNumber] = useState('');
-    const [date, setDate] = useState('');
 
     useEffect(() => {
         if (editingPlayer) {
             setName(editingPlayer.name);
             setRegistrationNumber(editingPlayer.registrationNumber);
-            setDate(editingPlayer.date);
         }
     }, [editingPlayer]);  
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        addPlayer(name, registrationNumber, date); 
+        // No backend, o campo `horas` sempre começa com 0, então não precisa ser enviado
+        addPlayer(registrationNumber, name); // Chamando a função `addPlayer` sem `horas`
         closeModal(); 
     };
 
@@ -64,16 +63,6 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                             type="text"
                             value={registrationNumber}
                             onChange={(e) => setRegistrationNumber(e.target.value)}
-                            className="w-full px-4 py-2 mt-2 rounded-lg bg-gray-600 text-white"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-white">Data</label>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
                             className="w-full px-4 py-2 mt-2 rounded-lg bg-gray-600 text-white"
                             required
                         />
