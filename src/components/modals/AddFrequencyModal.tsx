@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { findAllGames } from '../services/api/gameService';
-import { findAllPlayers } from '../services/api/playerService';
-import { createFrequency, findAllFrequencies } from '../services/api/frequencyService';
-import { Game } from '../types/Game';
-import { Player } from '../types/Player';
+import { findAllGames } from '../../services/api/gameService';
+import { findAllPlayers } from '../../services/api/playerService';
+import { createFrequency, findAllFrequencies } from '../../services/api/frequencyService';
+import { Game } from '../../types/Game';
+import { Player } from '../../types/Player';
 import toast from 'react-hot-toast';
 
 interface AddFrequencyModalProps {

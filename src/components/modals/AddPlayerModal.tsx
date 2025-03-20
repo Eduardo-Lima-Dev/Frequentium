@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { createPlayer, updatePlayer } from '../services/api/playerService';
+import { createPlayer, updatePlayer } from '../../services/api/playerService';
 import toast from 'react-hot-toast';
-import { Player } from '../types/Player';
+import { Player } from '../../types/Player';
 
 interface AddPlayerModalProps {
     isOpen: boolean;

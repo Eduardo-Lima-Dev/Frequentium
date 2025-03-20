@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { findAllPlayers } from '../services/api/playerService';
-import { findAllFrequencies } from '../services/api/frequencyService';
+import { findAllPlayers } from '../../services/api/playerService';
+import { findAllFrequencies } from '../../services/api/frequencyService';
 import toast from 'react-hot-toast';
 
 interface ViewFrequencyModalProps {
