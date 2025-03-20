@@ -8,6 +8,7 @@ import Pagination from '../components/Pagination';
 import { findAllPlayers, createManyPlayers } from '../services/api/playerService';
 import toast, { Toaster } from 'react-hot-toast';
 import { FaGamepad, FaUserPlus, FaFileUpload } from 'react-icons/fa';
+import { Player } from '../types/Player';
 
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,13 +18,6 @@ const Dashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const playersPerPage = 10;
     const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-
-    interface Player {
-        id: number;
-        name: string;
-        registrationNumber: string;
-        horas: number; 
-    }
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => {
@@ -103,7 +97,7 @@ const Dashboard: React.FC = () => {
                 id: player.id,
                 name: player.nome,
                 registrationNumber: player.matricula,
-                horas: player.horas || 0,
+                horas: Number(player.horas) || 0,
             }));
             setPlayers(formattedPlayers);
         } catch (error) {

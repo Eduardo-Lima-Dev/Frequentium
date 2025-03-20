@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import { deletePlayer } from '../services/api/playerService';
 import DeletePlayerModal from './DeletePlayerModal';
-
-interface Player {
-    id: number;
-    name: string;
-    registrationNumber: string;
-    horas: number;
-}
+import { Player } from '../types/Player';
 
 interface PlayerTableProps {
     players: Player[];

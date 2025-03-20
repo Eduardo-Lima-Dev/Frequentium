@@ -41,7 +41,11 @@ export const createPlayer = async (nome: string, matricula: string) => {
 export const updatePlayer = async (id: string | number, nome: string, matricula: string, horas: number) => {
     try {
         console.log(`Atualizando o jogador com ID ${id}`);
-        const response = await axios.put(`${API_URL}jogadores/${id}`, { nome, matricula, horas });
+        const response = await axios.put(`${API_URL}jogadores/${id}`, { 
+            nome, 
+            matricula, 
+            horas: Number(horas) 
+        });
         console.log('Jogador atualizado', response.data);
         return response.data;
     } catch (error) {

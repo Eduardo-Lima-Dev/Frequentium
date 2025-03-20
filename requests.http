@@ -59,10 +59,10 @@ Content-Type: application/json
 ###
 
 # Teste PUT /jogadores/{id} (Atualizar um jogador existente)
-PUT http://localhost:3000/jogadores/1
+PUT http://localhost:3000/jogadores/21
 Content-Type: application/json
 {
-  "nome": "Carlos Souza",
+  "nome": "Alice Souzah",
   "matricula": "123456",
   "horas": 5
 }

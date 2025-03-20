@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { createPlayer, updatePlayer } from '../services/api/playerService';
 import toast from 'react-hot-toast';
-
-interface Player {
-    id: number;
-    name: string;
-    registrationNumber: string;
-    horas: number;
-}
+import { Player } from '../types/Player';
 
 interface AddPlayerModalProps {
     isOpen: boolean;
@@ -25,15 +19,18 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
 }) => {
     const [name, setName] = useState('');
     const [registrationNumber, setRegistrationNumber] = useState('');
+    const [horas, setHoras] = useState(0);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (editingPlayer) {
             setName(editingPlayer.name);
             setRegistrationNumber(editingPlayer.registrationNumber);
+            setHoras(editingPlayer.horas);
         } else {
             setName('');
             setRegistrationNumber('');
+            setHoras(0);
         }
     }, [editingPlayer]);
 
@@ -43,7 +40,7 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
 
         try {
             if (editingPlayer) {
-                await updatePlayer(editingPlayer.id, name, registrationNumber, editingPlayer.horas);
+                await updatePlayer(editingPlayer.id, name, registrationNumber, horas);
             } else {
                 await createPlayer(name, registrationNumber);
             }
@@ -96,6 +93,21 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                             required
                         />
                     </div>
+                    {editingPlayer && (
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-2">
+                                Horas
+                            </label>
+                            <input
+                                type="number"
+                                value={horas}
+                                onChange={(e) => setHoras(Number(e.target.value))}
+                                className="w-full p-2 rounded bg-gray-700 text-white"
+                                min="0"
+                                required
+                            />
+                        </div>
+                    )}
                     <div className="flex justify-end gap-4">
                         <button
                             type="button"
