@@ -3,15 +3,17 @@ import { Link } from 'react-router-dom';
 import { findAllGames, createGame, updateGame, deleteGame } from '../services/api/gameService';
 import GameTable from '../components/GameTable';
 import AddGameModal from '../components/AddGameModal';
-import DeleteGameModal from '../components/DeleteGameModal';
+import AddFrequencyModal from '../components/AddFrequencyModal';
+import DeleteModal from '../components/DeleteModal';
 import Pagination from '../components/Pagination';
 import Header from '../components/Header';
 import toast, { Toaster } from 'react-hot-toast';
 import { Game } from '../types/Game';
-import { FaArrowLeft, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaPlus, FaClipboardCheck } from 'react-icons/fa';
 
 const GameDashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false);
     const [games, setGames] = useState<Game[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const gamesPerPage = 10;
@@ -26,14 +28,17 @@ const GameDashboard: React.FC = () => {
         setEditingGame(null);
     };
 
+    const openFrequencyModal = () => setIsFrequencyModalOpen(true);
+    const closeFrequencyModal = () => setIsFrequencyModalOpen(false);
+
     const fetchGames = async () => {
         setIsLoading(true);
         try {
             const data = await findAllGames();
-            const formattedGames = data.map((game: { id: number; data: string; duracao: number }) => ({
+            const formattedGames = data.map(game => ({
                 id: game.id,
                 data: game.data,
-                duracao: game.duracao,
+                duracao: Math.floor(game.duracao / 60), // Convertendo minutos para horas
             }));
             setGames(formattedGames);
         } catch (error) {
@@ -45,7 +50,7 @@ const GameDashboard: React.FC = () => {
 
     const addGame = async (data: string, duracao: number) => {
         try {
-            const newGame = await createGame(data, duracao);
+            const newGame = await createGame(data, duracao * 60); // Convertendo horas para minutos
             if (newGame) {
                 await fetchGames();
                 closeModal();
@@ -64,7 +69,7 @@ const GameDashboard: React.FC = () => {
 
     const updateGameDetails = async (id: number, data: string, duracao: number) => {
         try {
-            const updatedGame = await updateGame(id, data, duracao);
+            const updatedGame = await updateGame(id, data, duracao * 60); // Convertendo horas para minutos
             if (updatedGame) {
                 await fetchGames();
                 closeModal();
@@ -128,6 +133,13 @@ const GameDashboard: React.FC = () => {
                         <FaPlus />
                         Adicionar Novo Jogo
                     </button>
+                    <button
+                        onClick={openFrequencyModal}
+                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2"
+                    >
+                        <FaClipboardCheck />
+                        Adicionar Frequência
+                    </button>
                 </div>
 
                 <GameTable 
@@ -152,14 +164,21 @@ const GameDashboard: React.FC = () => {
                 editingGame={editingGame}
                 updateGame={updateGameDetails}
             />
-            <DeleteGameModal
+            <AddFrequencyModal
+                isOpen={isFrequencyModalOpen}
+                closeModal={closeFrequencyModal}
+                onSuccess={fetchGames}
+            />
+            <DeleteModal
                 isOpen={isDeleteModalOpen}
                 closeModal={() => {
                     setIsDeleteModalOpen(false);
                     setGameToDelete(null);
                 }}
-                gameToDelete={gameToDelete}
                 onDelete={handleDelete}
+                itemId={gameToDelete?.id || 0}
+                itemName={gameToDelete ? new Date(gameToDelete.data).toLocaleDateString('pt-BR') : ''}
+                itemType="jogo"
             />
         </div>
     );

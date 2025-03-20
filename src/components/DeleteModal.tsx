@@ -1,34 +1,26 @@
 import React from 'react';
-import { Game } from '../types/Game';
 
-interface DeleteGameModalProps {
+interface DeleteModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    gameToDelete: Game | null;
     onDelete: (id: number) => void;
+    itemId: number;
+    itemName: string;
+    itemType: 'jogador' | 'jogo';
 }
 
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    
-    return `${day}/${month}/${year} - ${hours}:${minutes}`;
-};
-
-const DeleteGameModal: React.FC<DeleteGameModalProps> = ({
+const DeleteModal: React.FC<DeleteModalProps> = ({
     isOpen,
     closeModal,
-    gameToDelete,
     onDelete,
+    itemId,
+    itemName,
+    itemType,
 }) => {
-    if (!isOpen || !gameToDelete) return null;
+    if (!isOpen) return null;
 
     const handleDelete = () => {
-        onDelete(gameToDelete.id);
+        onDelete(itemId);
         closeModal();
     };
 
@@ -42,10 +34,10 @@ const DeleteGameModal: React.FC<DeleteGameModalProps> = ({
                         </span>
                     </div>
                     <h3 className="text-xl text-white mb-4">
-                        Tem certeza que deseja excluir o jogo?
+                        Tem certeza que deseja excluir o {itemType}?
                     </h3>
                     <p className="text-white font-bold text-lg mb-6">
-                        Data: {formatDate(gameToDelete.data)}
+                        {itemType === 'jogador' ? `Nome: ${itemName}` : `Data: ${itemName}`}
                     </p>
                     <div className="flex justify-center gap-4">
                         <button
@@ -67,4 +59,4 @@ const DeleteGameModal: React.FC<DeleteGameModalProps> = ({
     );
 };
 
-export default DeleteGameModal; 
+export default DeleteModal; 

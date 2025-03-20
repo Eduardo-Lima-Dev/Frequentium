@@ -1,69 +1,54 @@
-import axios from 'axios';
+import { api } from './api';
+import { Game } from '../../types/Game';
 
-const API_URL = 'http://localhost:3000/';
-
-export interface Game {
+interface GameResponse {
     id: number;
     data: string;
     duracao: number;
 }
 
-export const findAllGames = async () => {
-    try {
-        console.log('Buscando todos os jogos');
-        const response = await axios.get(`${API_URL}jogos`);
-        console.log('Jogos encontrados:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error('Erro ao buscar os jogos', error);
-        return [];
-    }
+export const findAllGames = async (): Promise<Game[]> => {
+    const response = await api.get<GameResponse[]>('/jogos');
+    return response.data.map(game => ({
+        id: game.id,
+        data: game.data,
+        duracao: game.duracao
+    }));
 };
 
-export const findGameById = async (id: number) => {
-    try {
-        console.log(`Buscando jogo com ID ${id}`);
-        const response = await axios.get(`${API_URL}jogos/${id}`);
-        console.log('Jogo encontrado:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error(`Erro ao buscar o jogo com ID ${id}`, error);
-        return null;
-    }
+export const findGameById = async (id: number): Promise<Game> => {
+    const response = await api.get<GameResponse>(`/jogos/${id}`);
+    return {
+        id: response.data.id,
+        data: response.data.data,
+        duracao: response.data.duracao
+    };
 };
 
-export const createGame = async (data: string, duracao: number) => {
-    try {
-        console.log('Criando novo jogo');
-        const response = await axios.post(`${API_URL}jogos`, { data, duracao });
-        console.log('Jogo criado:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error('Erro ao criar o jogo', error);
-        return null;
-    }
+export const createGame = async (data: string, duracao: number): Promise<Game> => {
+    const response = await api.post<GameResponse>('/jogos', {
+        data,
+        duracao
+    });
+    return {
+        id: response.data.id,
+        data: response.data.data,
+        duracao: response.data.duracao
+    };
 };
 
-export const updateGame = async (id: number, data: string, duracao: number) => {
-    try {
-        console.log(`Atualizando jogo com ID ${id}`);
-        const response = await axios.put(`${API_URL}jogos/${id}`, { data, duracao });
-        console.log('Jogo atualizado:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error(`Erro ao atualizar o jogo com ID ${id}`, error);
-        return null;
-    }
+export const updateGame = async (id: number, data: string, duracao: number): Promise<Game> => {
+    const response = await api.put<GameResponse>(`/jogos/${id}`, {
+        data,
+        duracao
+    });
+    return {
+        id: response.data.id,
+        data: response.data.data,
+        duracao: response.data.duracao
+    };
 };
 
-export const deleteGame = async (id: number) => {
-    try {
-        console.log(`Excluindo jogo com ID ${id}`);
-        const response = await axios.delete(`${API_URL}jogos/${id}`);
-        console.log('Jogo excluído com sucesso');
-        return response.data;
-    } catch (error) {
-        console.error(`Erro ao excluir o jogo com ID ${id}`, error);
-        return null;
-    }
+export const deleteGame = async (id: number): Promise<void> => {
+    await api.delete(`/jogos/${id}`);
 };

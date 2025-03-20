@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import { Game } from '../types/Game';
+import DeleteModal from './DeleteModal';
 
 interface GameTableProps {
     games: Game[];
@@ -9,16 +10,31 @@ interface GameTableProps {
     isLoading: boolean;
 }
 
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    
-    return `${day}/${month}/${year}`;
-};
-
 const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClick, isLoading }) => {
+    const [gameToDelete, setGameToDelete] = useState<Game | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${day}/${month}/${year}`;
+    };
+
+    const openDeleteModal = (game: Game) => {
+        setGameToDelete(game);
+        setIsModalOpen(true);
+    };
+
+    // Ordenar os jogos por data (do mais recente para o mais antigo)
+    const sortedGames = [...games].sort((a, b) => {
+        const dateA = new Date(a.data);
+        const dateB = new Date(b.data);
+        return dateB.getTime() - dateA.getTime();
+    });
+
     return (
         <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-md w-full">
             {isLoading ? (
@@ -30,15 +46,15 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
                     <thead className="bg-gray-700 text-left">
                         <tr>
                             <th className="px-6 py-4 text-center">Data</th>
-                            <th className="px-6 py-4 text-center">Duração (min)</th>
+                            <th className="px-6 py-4 text-center">Duração</th>
                             <th className="px-6 py-4 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {games.map((game) => (
+                        {sortedGames.map((game) => (
                             <tr key={game.id} className="border-b border-gray-700">
                                 <td className="px-6 py-4 text-center">{formatDate(game.data)}</td>
-                                <td className="px-6 py-4 text-center">{game.duracao}</td>
+                                <td className="px-6 py-4 text-center">{game.duracao} {game.duracao === 1 ? 'hora' : 'horas'}</td>
                                 <td className="px-6 py-4 text-center">
                                     <button
                                         onClick={() => editGame(game)}
@@ -48,7 +64,7 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
                                         <FaEdit />
                                     </button>
                                     <button
-                                        onClick={() => handleDeleteClick(game)}
+                                        onClick={() => openDeleteModal(game)}
                                         className="text-red-500"
                                         title="Excluir"
                                     >
@@ -60,6 +76,18 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
                     </tbody>
                 </table>
             )}
+
+            <DeleteModal
+                isOpen={isModalOpen}
+                closeModal={() => {
+                    setIsModalOpen(false);
+                    setGameToDelete(null);
+                }}
+                onDelete={(id) => handleDeleteClick({ ...gameToDelete!, id })}
+                itemId={gameToDelete?.id || 0}
+                itemName={gameToDelete ? formatDate(gameToDelete.data) : ''}
+                itemType="jogo"
+            />
         </div>
     );
 };

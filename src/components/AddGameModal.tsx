@@ -1,51 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import { Game } from '../types/Game';
 
 interface AddGameModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    addGame: (data: string, duracao: number) => void;
+    addGame: (data: string, duracao: number) => Promise<void>;
     editingGame: Game | null;
-    updateGame: (id: number, data: string, duracao: number) => void;
+    updateGame: (id: number, data: string, duracao: number) => Promise<void>;
 }
 
 const AddGameModal: React.FC<AddGameModalProps> = ({
     isOpen,
     closeModal,
     addGame,
-    updateGame,
     editingGame,
+    updateGame
 }) => {
     const [data, setData] = useState('');
-    const [duracao, setDuracao] = useState(90);
+    const [duracao, setDuracao] = useState('');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (editingGame) {
-            const date = new Date(editingGame.data);
-            const formattedDate = date.toISOString().split('T')[0];
+            // Formatar a data para o formato YYYY-MM-DD
+            const gameDate = new Date(editingGame.data);
+            const formattedDate = gameDate.toISOString().split('T')[0];
             setData(formattedDate);
-            setDuracao(editingGame.duracao);
+            setDuracao(editingGame.duracao.toString());
         } else {
             setData('');
-            setDuracao(90);
+            setDuracao('');
         }
     }, [editingGame]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!data || !duracao) {
+            return;
+        }
+
         setLoading(true);
-        
         try {
             if (editingGame) {
-                await updateGame(editingGame.id, data, duracao);
+                await updateGame(editingGame.id, data, Number(duracao));
             } else {
-                await addGame(data, duracao);
+                await addGame(data, Number(duracao));
             }
             closeModal();
         } catch (error) {
             console.error('Erro ao salvar jogo:', error);
+            toast.error('Erro ao salvar jogo');
         } finally {
             setLoading(false);
         }
@@ -80,17 +86,18 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium mb-2">
-                            Duração (minutos)
+                            Duração (horas)
                         </label>
-                        <input
-                            type="number"
+                        <select
                             value={duracao}
-                            onChange={(e) => setDuracao(Number(e.target.value))}
+                            onChange={(e) => setDuracao(e.target.value)}
                             className="w-full p-2 rounded bg-gray-700 text-white"
-                            min="30"
-                            max="180"
                             required
-                        />
+                        >
+                            <option value="1">1 hora</option>
+                            <option value="2">2 horas</option>
+                            <option value="3">3 horas</option>
+                        </select>
                     </div>
                     <div className="flex justify-end gap-4">
                         <button
@@ -106,7 +113,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
                             className="px-4 py-2 bg-green-500 rounded hover:bg-green-600"
                             disabled={loading}
                         >
-                            {loading ? 'Processando...' : (editingGame ? 'Atualizar' : 'Adicionar')}
+                            {loading ? 'Processando...' : editingGame ? 'Atualizar' : 'Adicionar'}
                         </button>
                     </div>
                 </form>

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import { deletePlayer } from '../services/api/playerService';
-import DeletePlayerModal from './DeletePlayerModal';
+import DeleteModal from './DeleteModal';
 import { Player } from '../types/Player';
+import toast from 'react-hot-toast';
 
 interface PlayerTableProps {
     players: Player[];
@@ -24,11 +25,15 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer, setPlaye
         try {
             await deletePlayer(playerId);
             setPlayers(prevPlayers => prevPlayers.filter(player => player.id !== playerId));
-            console.log('Jogador excluído com sucesso');
+            toast.success('Jogador excluído com sucesso!');
         } catch (error) {
             console.error('Erro ao excluir jogador', error);
+            toast.error('Erro ao excluir jogador');
         } 
     };
+
+    // Ordenar os jogadores por nome
+    const sortedPlayers = [...players].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
     if (isLoading) {
         return (
@@ -53,7 +58,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer, setPlaye
                     </tr>
                 </thead>
                 <tbody>
-                    {players.map((player) => {
+                    {sortedPlayers.map((player) => {
                         const playerInitial = player.name.charAt(0).toUpperCase();
                         return (
                             <tr key={player.id} className="border-b border-gray-700">
@@ -63,12 +68,14 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer, setPlaye
                                     </div>
                                     {player.name}
                                 </td>
-                                <td className="px-6 py-4 text-center">{player.registrationNumber}</td>
-                                <td className="px-6 py-4 text-center">{player.horas}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                    {player.registrationNumber}
+                                </td>
+                                <td className="px-6 py-4 text-center">{Math.floor(player.horas / 60)} {Math.floor(player.horas / 60) === 1 ? 'hora' : 'horas'}</td>
                                 <td className="px-6 py-4 text-center">
                                     <button
                                         onClick={() => editPlayer(player)}
-                                        className="text-green-500 mr-8"
+                                        className="text-green-500 mr-4"
                                         title="Editar"
                                     >
                                         <FaEdit />
@@ -87,11 +94,16 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer, setPlaye
                 </tbody>
             </table>
 
-            <DeletePlayerModal
+            <DeleteModal
                 isOpen={isModalOpen}
-                closeModal={() => setIsModalOpen(false)}
-                playerToDelete={playerToDelete}
+                closeModal={() => {
+                    setIsModalOpen(false);
+                    setPlayerToDelete(null);
+                }}
                 onDelete={handleDelete}
+                itemId={playerToDelete?.id || 0}
+                itemName={playerToDelete?.name || ''}
+                itemType="jogador"
             />
         </div>
     );

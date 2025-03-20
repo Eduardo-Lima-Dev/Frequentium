@@ -7,7 +7,7 @@ import UploadJsonModal from '../components/UploadJsonModal';
 import Pagination from '../components/Pagination';
 import { findAllPlayers, createManyPlayers } from '../services/api/playerService';
 import toast, { Toaster } from 'react-hot-toast';
-import { FaGamepad, FaUserPlus, FaFileUpload } from 'react-icons/fa';
+import { FaGamepad, FaFileUpload, FaPlus } from 'react-icons/fa';
 import { Player } from '../types/Player';
 
 const Dashboard: React.FC = () => {
@@ -93,15 +93,10 @@ const Dashboard: React.FC = () => {
         try {
             const data = await findAllPlayers();
             console.log('Jogadores recebidos do backend:', data);
-            const formattedPlayers = data.map((player: { id: number; nome: string; matricula: string; horas?: number }) => ({
-                id: player.id,
-                name: player.nome,
-                registrationNumber: player.matricula,
-                horas: Number(player.horas) || 0,
-            }));
-            setPlayers(formattedPlayers);
+            setPlayers(data);
         } catch (error) {
             console.error('Erro ao buscar jogadores:', error);
+            toast.error('Erro ao carregar jogadores');
         } finally {
             setIsLoading(false);
         }
@@ -130,7 +125,7 @@ const Dashboard: React.FC = () => {
                         onClick={openModal}
                         className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center gap-2"
                     >
-                        <FaUserPlus />
+                        <FaPlus />
                         Adicionar Novo Jogador
                     </button>
                     <button
@@ -169,11 +164,11 @@ const Dashboard: React.FC = () => {
                 closeModal={closeModal}
                 editingPlayer={editingPlayer}
                 onSuccess={async () => {
-                    await fetchPlayers();
-                    if (editingPlayer) {
-                        toast.success('Jogador atualizado com sucesso!');
-                    } else {
-                        toast.success('Jogador adicionado com sucesso!');
+                    try {
+                        await fetchPlayers();
+                    } catch (error) {
+                        console.error('Erro ao atualizar lista de jogadores:', error);
+                        toast.error('Erro ao atualizar lista de jogadores');
                     }
                 }}
             />

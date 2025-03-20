@@ -19,20 +19,25 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
 }) => {
     const [name, setName] = useState('');
     const [registrationNumber, setRegistrationNumber] = useState('');
-    const [horas, setHoras] = useState(0);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (editingPlayer) {
-            setName(editingPlayer.name);
-            setRegistrationNumber(editingPlayer.registrationNumber);
-            setHoras(editingPlayer.horas);
-        } else {
-            setName('');
-            setRegistrationNumber('');
-            setHoras(0);
+        if (isOpen) {
+            if (editingPlayer) {
+                setName(editingPlayer.name);
+                setRegistrationNumber(editingPlayer.registrationNumber);
+            } else {
+                setName('');
+                setRegistrationNumber('');
+            }
         }
-    }, [editingPlayer]);
+    }, [isOpen, editingPlayer]);
+
+    const handleClose = () => {
+        setName('');
+        setRegistrationNumber('');
+        closeModal();
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -40,12 +45,16 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
 
         try {
             if (editingPlayer) {
-                await updatePlayer(editingPlayer.id, name, registrationNumber, horas);
+                const updatedPlayer = await updatePlayer(editingPlayer.id, name, registrationNumber, editingPlayer.horas);
+                if (!updatedPlayer) throw new Error('Erro ao atualizar jogador');
             } else {
-                await createPlayer(name, registrationNumber);
+                const newPlayer = await createPlayer(name, registrationNumber);
+                if (!newPlayer) throw new Error('Erro ao criar jogador');
             }
+
             await onSuccess();
-            closeModal();
+            handleClose();
+            toast.success(editingPlayer ? 'Jogador atualizado com sucesso!' : 'Jogador adicionado com sucesso!');
         } catch (error) {
             console.error('Erro ao salvar jogador', error);
             toast.error('Erro ao salvar jogador. Tente novamente.');
@@ -60,7 +69,7 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md relative">
                 <button
-                    onClick={closeModal}
+                    onClick={handleClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white"
                 >
                     <FaTimes />
@@ -93,25 +102,10 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                             required
                         />
                     </div>
-                    {editingPlayer && (
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-2">
-                                Horas
-                            </label>
-                            <input
-                                type="number"
-                                value={horas}
-                                onChange={(e) => setHoras(Number(e.target.value))}
-                                className="w-full p-2 rounded bg-gray-700 text-white"
-                                min="0"
-                                required
-                            />
-                        </div>
-                    )}
                     <div className="flex justify-end gap-4">
                         <button
                             type="button"
-                            onClick={closeModal}
+                            onClick={handleClose}
                             className="px-4 py-2 bg-gray-600 rounded hover:bg-gray-500"
                             disabled={loading}
                         >
