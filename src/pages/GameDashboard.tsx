@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { findAllGames, createGame, updateGame, deleteGame } from '../services/api/gameService';
+import { findAllFrequencies } from '../services/api/frequencyService';
 import GameTable from '../components/GameTable';
-import AddGameModal from '../components/AddGameModal';
-import AddFrequencyModal from '../components/AddFrequencyModal';
-import DeleteModal from '../components/DeleteModal';
+import AddGameModal from '../components/modals/AddGameModal';
+import AddFrequencyModal from '../components/modals/AddFrequencyModal';
+import DeleteModal from '../components/modals/DeleteModal';
 import Pagination from '../components/Pagination';
 import Header from '../components/Header';
 import toast, { Toaster } from 'react-hot-toast';
@@ -38,7 +39,7 @@ const GameDashboard: React.FC = () => {
             const formattedGames = data.map(game => ({
                 id: game.id,
                 data: game.data,
-                duracao: Math.floor(game.duracao / 60), // Convertendo minutos para horas
+                duracao: game.duracao,
             }));
             setGames(formattedGames);
         } catch (error) {
@@ -50,7 +51,7 @@ const GameDashboard: React.FC = () => {
 
     const addGame = async (data: string, duracao: number) => {
         try {
-            const newGame = await createGame(data, duracao * 60); // Convertendo horas para minutos
+            const newGame = await createGame(data, duracao);
             if (newGame) {
                 await fetchGames();
                 closeModal();
@@ -69,7 +70,7 @@ const GameDashboard: React.FC = () => {
 
     const updateGameDetails = async (id: number, data: string, duracao: number) => {
         try {
-            const updatedGame = await updateGame(id, data, duracao * 60); // Convertendo horas para minutos
+            const updatedGame = await updateGame(id, data, duracao);
             if (updatedGame) {
                 await fetchGames();
                 closeModal();
@@ -88,6 +89,17 @@ const GameDashboard: React.FC = () => {
 
     const handleDelete = async (id: number) => {
         try {
+            // Verifica se existem frequências vinculadas ao jogo
+            const frequencies = await findAllFrequencies();
+            const hasFrequencies = frequencies.some(freq => freq.jogoId === id);
+
+            if (hasFrequencies) {
+                toast.error('Não é possível excluir este jogo pois existem frequências vinculadas a ele.');
+                setIsDeleteModalOpen(false);
+                setGameToDelete(null);
+                return;
+            }
+
             await deleteGame(id);
             await fetchGames();
             setIsDeleteModalOpen(false);

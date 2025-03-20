@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaClipboardList } from 'react-icons/fa';
 import { Game } from '../types/Game';
-import DeleteModal from './DeleteModal';
+import DeleteModal from './modals/DeleteModal';
+import ViewFrequencyModal from './modals/ViewFrequencyModal';
 
 interface GameTableProps {
     games: Game[];
@@ -12,7 +13,9 @@ interface GameTableProps {
 
 const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClick, isLoading }) => {
     const [gameToDelete, setGameToDelete] = useState<Game | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+    const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -25,7 +28,12 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
 
     const openDeleteModal = (game: Game) => {
         setGameToDelete(game);
-        setIsModalOpen(true);
+        setIsDeleteModalOpen(true);
+    };
+
+    const openFrequencyModal = (game: Game) => {
+        setSelectedGame(game);
+        setIsFrequencyModalOpen(true);
     };
 
     // Ordenar os jogos por data (do mais recente para o mais antigo)
@@ -57,6 +65,13 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
                                 <td className="px-6 py-4 text-center">{game.duracao} {game.duracao === 1 ? 'hora' : 'horas'}</td>
                                 <td className="px-6 py-4 text-center">
                                     <button
+                                        onClick={() => openFrequencyModal(game)}
+                                        className="text-blue-500 mr-4"
+                                        title="Ver Frequência"
+                                    >
+                                        <FaClipboardList />
+                                    </button>
+                                    <button
                                         onClick={() => editGame(game)}
                                         className="text-green-500 mr-4"
                                         title="Editar"
@@ -78,15 +93,25 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
             )}
 
             <DeleteModal
-                isOpen={isModalOpen}
+                isOpen={isDeleteModalOpen}
                 closeModal={() => {
-                    setIsModalOpen(false);
+                    setIsDeleteModalOpen(false);
                     setGameToDelete(null);
                 }}
                 onDelete={(id) => handleDeleteClick({ ...gameToDelete!, id })}
                 itemId={gameToDelete?.id || 0}
                 itemName={gameToDelete ? formatDate(gameToDelete.data) : ''}
                 itemType="jogo"
+            />
+
+            <ViewFrequencyModal
+                isOpen={isFrequencyModalOpen}
+                closeModal={() => {
+                    setIsFrequencyModalOpen(false);
+                    setSelectedGame(null);
+                }}
+                gameId={selectedGame?.id || 0}
+                gameDate={selectedGame?.data || ''}
             />
         </div>
     );

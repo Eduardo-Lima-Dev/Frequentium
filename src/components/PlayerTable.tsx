@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import { deletePlayer } from '../services/api/playerService';
-import DeleteModal from './DeleteModal';
+import DeleteModal from './modals/DeleteModal';
 import { Player } from '../types/Player';
 import toast from 'react-hot-toast';
 
@@ -71,7 +71,9 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer, setPlaye
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                     {player.registrationNumber}
                                 </td>
-                                <td className="px-6 py-4 text-center">{Math.floor(player.horas / 60)} {Math.floor(player.horas / 60) === 1 ? 'hora' : 'horas'}</td>
+                                <td className="px-6 py-4 text-center">
+                                    {player.horas} {player.horas === 1 ? 'hora' : 'horas'}
+                                </td>
                                 <td className="px-6 py-4 text-center">
                                     <button
                                         onClick={() => editPlayer(player)}

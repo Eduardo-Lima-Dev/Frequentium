@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { findAllGames } from '../services/api/gameService';
 import { findAllPlayers } from '../services/api/playerService';
-import { createFrequency } from '../services/api/frequencyService';
+import { createFrequency, findAllFrequencies } from '../services/api/frequencyService';
 import { Game } from '../types/Game';
 import { Player } from '../types/Player';
 import toast from 'react-hot-toast';
@@ -24,24 +24,47 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
     const [selectedPlayers, setSelectedPlayers] = useState<number[]>([]);
     const [loading, setLoading] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(false);
+    const [frequencies, setFrequencies] = useState<{ jogoId: number; jogadorId: number }[]>([]);
+
+    // Função para buscar e marcar os jogadores com frequência
+    const updateSelectedPlayers = (gameId: number, frequenciesData: { jogoId: number; jogadorId: number }[]) => {
+        const playersWithFrequency = frequenciesData
+            .filter(freq => freq.jogoId === gameId)
+            .map(freq => freq.jogadorId);
+        console.log('Jogadores com frequência:', playersWithFrequency);
+        setSelectedPlayers(playersWithFrequency);
+    };
 
     useEffect(() => {
         if (isOpen) {
             const fetchData = async () => {
                 setIsLoadingData(true);
                 try {
-                    const [gamesData, playersData] = await Promise.all([
+                    const [gamesData, playersData, frequenciesData] = await Promise.all([
                         findAllGames(),
-                        findAllPlayers()
+                        findAllPlayers(),
+                        findAllFrequencies()
                     ]);
-                    setGames(gamesData);
+
+                    // Ordenar jogos por data (do mais recente para o mais antigo)
+                    const sortedGames = [...gamesData].sort((a, b) => {
+                        return new Date(b.data).getTime() - new Date(a.data).getTime();
+                    });
+
+                    setGames(sortedGames);
+                    setFrequencies(frequenciesData);
+                    
+                    // Definir o jogo mais recente como selecionado
+                    if (sortedGames.length > 0) {
+                        const mostRecentGameId = sortedGames[0].id;
+                        setSelectedGameId(mostRecentGameId);
+                        updateSelectedPlayers(mostRecentGameId, frequenciesData);
+                    }
+
                     const sortedPlayers = [...playersData].sort((a, b) => 
                         a.name.localeCompare(b.name, 'pt-BR')
                     );
                     setPlayers(sortedPlayers);
-                    if (gamesData.length > 0) {
-                        setSelectedGameId(gamesData[0].id);
-                    }
                 } catch (error) {
                     console.error('Erro ao carregar dados:', error);
                     toast.error('Erro ao carregar dados');
@@ -52,6 +75,13 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
             fetchData();
         }
     }, [isOpen]);
+
+    // Atualizar seleção de jogadores quando mudar o jogo
+    const handleGameChange = (gameId: number) => {
+        console.log('Jogo selecionado:', gameId);
+        setSelectedGameId(gameId);
+        updateSelectedPlayers(gameId, frequencies);
+    };
 
     const handlePlayerToggle = (playerId: number) => {
         setSelectedPlayers(prev => 
@@ -76,6 +106,7 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
             await Promise.all(promises);
             await onSuccess();
             closeModal();
+            setSelectedPlayers([]);
             toast.success('Frequência registrada com sucesso!');
         } catch (error) {
             console.error('Erro ao registrar frequência:', error);
@@ -104,7 +135,7 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                         </label>
                         <select
                             value={selectedGameId}
-                            onChange={(e) => setSelectedGameId(Number(e.target.value))}
+                            onChange={(e) => handleGameChange(Number(e.target.value))}
                             className="w-full p-2 rounded bg-gray-700 text-white"
                             required
                         >

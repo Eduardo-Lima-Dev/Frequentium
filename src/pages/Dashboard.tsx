@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import PlayerTable from '../components/PlayerTable';
-import AddPlayerModal from '../components/AddPlayerModal';
-import UploadJsonModal from '../components/UploadJsonModal';
+import AddPlayerModal from '../components/modals/AddPlayerModal';
+import UploadJsonModal from '../components/modals/UploadJsonModal';
 import Pagination from '../components/Pagination';
 import { findAllPlayers, createManyPlayers } from '../services/api/playerService';
 import toast, { Toaster } from 'react-hot-toast';
 import { FaGamepad, FaFileUpload, FaPlus } from 'react-icons/fa';
 import { Player } from '../types/Player';
+import AddFrequencyModal from '../components/modals/AddFrequencyModal';
 
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +19,7 @@ const Dashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const playersPerPage = 10;
     const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+    const [isFrequencyModalOpen, setIsFrequencyModalOpen] = useState(false);
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => {
@@ -27,6 +29,8 @@ const Dashboard: React.FC = () => {
 
     const openUploadModal = () => setIsUploadModalOpen(true);
     const closeUploadModal = () => setIsUploadModalOpen(false);
+
+    const closeFrequencyModal = () => setIsFrequencyModalOpen(false);
 
     const handleFileUpload = async (file: File) => {
         setIsLoading(true);
@@ -92,8 +96,9 @@ const Dashboard: React.FC = () => {
         setIsLoading(true);
         try {
             const data = await findAllPlayers();
-            console.log('Jogadores recebidos do backend:', data);
-            setPlayers(data);
+            // Ordenar os jogadores por nome
+            const sortedPlayers = data.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+            setPlayers(sortedPlayers);
         } catch (error) {
             console.error('Erro ao buscar jogadores:', error);
             toast.error('Erro ao carregar jogadores');
@@ -177,6 +182,19 @@ const Dashboard: React.FC = () => {
                 isOpen={isUploadModalOpen}
                 closeModal={closeUploadModal}
                 handleFileUpload={handleFileUpload}
+            />
+
+            <AddFrequencyModal
+                isOpen={isFrequencyModalOpen}
+                closeModal={closeFrequencyModal}
+                onSuccess={async () => {
+                    try {
+                        await fetchPlayers();
+                    } catch (error) {
+                        console.error('Erro ao atualizar lista de jogadores:', error);
+                        toast.error('Erro ao atualizar lista de jogadores');
+                    }
+                }}
             />
         </div>
     );

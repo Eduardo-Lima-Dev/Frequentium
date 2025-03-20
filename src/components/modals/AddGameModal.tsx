@@ -19,7 +19,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
     updateGame
 }) => {
     const [data, setData] = useState('');
-    const [duracao, setDuracao] = useState('');
+    const [duracao, setDuracao] = useState('1');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -31,13 +31,17 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
             setDuracao(editingGame.duracao.toString());
         } else {
             setData('');
-            setDuracao('');
+            setDuracao('1');
         }
     }, [editingGame]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        console.log('Dados do formulário:', { data, duracao });
+        
         if (!data || !duracao) {
+            toast.error('Por favor, preencha todos os campos');
             return;
         }
 
@@ -48,6 +52,8 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
             } else {
                 await addGame(data, Number(duracao));
             }
+            setData('');
+            setDuracao('1');
             closeModal();
         } catch (error) {
             console.error('Erro ao salvar jogo:', error);
