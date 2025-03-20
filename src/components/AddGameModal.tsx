@@ -1,57 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { createPlayer, updatePlayer } from '../services/api/playerService';
-import toast from 'react-hot-toast';
+import { Game } from '../types/Game';
 
-interface Player {
-    id: number;
-    name: string;
-    registrationNumber: string;
-    horas: number;
-}
-
-interface AddPlayerModalProps {
+interface AddGameModalProps {
     isOpen: boolean;
     closeModal: () => void;
-    editingPlayer: Player | null;
-    onSuccess: () => Promise<void>;
+    addGame: (data: string, duracao: number) => void;
+    editingGame: Game | null;
+    updateGame: (id: number, data: string, duracao: number) => void;
 }
 
-const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
+const AddGameModal: React.FC<AddGameModalProps> = ({
     isOpen,
     closeModal,
-    editingPlayer,
-    onSuccess
+    addGame,
+    updateGame,
+    editingGame,
 }) => {
-    const [name, setName] = useState('');
-    const [registrationNumber, setRegistrationNumber] = useState('');
+    const [data, setData] = useState('');
+    const [duracao, setDuracao] = useState(90);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (editingPlayer) {
-            setName(editingPlayer.name);
-            setRegistrationNumber(editingPlayer.registrationNumber);
+        if (editingGame) {
+            const date = new Date(editingGame.data);
+            const formattedDate = date.toISOString().split('T')[0];
+            setData(formattedDate);
+            setDuracao(editingGame.duracao);
         } else {
-            setName('');
-            setRegistrationNumber('');
+            setData('');
+            setDuracao(90);
         }
-    }, [editingPlayer]);
+    }, [editingGame]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-
+        
         try {
-            if (editingPlayer) {
-                await updatePlayer(editingPlayer.id, name, registrationNumber, editingPlayer.horas);
+            if (editingGame) {
+                await updateGame(editingGame.id, data, duracao);
             } else {
-                await createPlayer(name, registrationNumber);
+                await addGame(data, duracao);
             }
-            await onSuccess();
             closeModal();
         } catch (error) {
-            console.error('Erro ao salvar jogador', error);
-            toast.error('Erro ao salvar jogador. Tente novamente.');
+            console.error('Erro ao salvar jogo:', error);
         } finally {
             setLoading(false);
         }
@@ -69,30 +63,32 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                     <FaTimes />
                 </button>
                 <h2 className="text-2xl mb-4">
-                    {editingPlayer ? 'Editar Jogador' : 'Adicionar Novo Jogador'}
+                    {editingGame ? 'Editar Jogo' : 'Adicionar Novo Jogo'}
                 </h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-sm font-medium mb-2">
-                            Nome
+                            Data do Jogo
                         </label>
                         <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            type="date"
+                            value={data}
+                            onChange={(e) => setData(e.target.value)}
                             className="w-full p-2 rounded bg-gray-700 text-white"
                             required
                         />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium mb-2">
-                            Matrícula
+                            Duração (minutos)
                         </label>
                         <input
-                            type="text"
-                            value={registrationNumber}
-                            onChange={(e) => setRegistrationNumber(e.target.value)}
+                            type="number"
+                            value={duracao}
+                            onChange={(e) => setDuracao(Number(e.target.value))}
                             className="w-full p-2 rounded bg-gray-700 text-white"
+                            min="30"
+                            max="180"
                             required
                         />
                     </div>
@@ -110,7 +106,7 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
                             className="px-4 py-2 bg-green-500 rounded hover:bg-green-600"
                             disabled={loading}
                         >
-                            {loading ? 'Processando...' : (editingPlayer ? 'Atualizar' : 'Adicionar')}
+                            {loading ? 'Processando...' : (editingGame ? 'Atualizar' : 'Adicionar')}
                         </button>
                     </div>
                 </form>
@@ -119,4 +115,4 @@ const AddPlayerModal: React.FC<AddPlayerModalProps> = ({
     );
 };
 
-export default AddPlayerModal;
+export default AddGameModal;

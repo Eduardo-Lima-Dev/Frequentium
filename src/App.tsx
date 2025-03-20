@@ -1,11 +1,8 @@
-import Dashboard from './pages/Dashboard';
+import React from 'react';
+import AppRoutes from './routes';
 
-function App() {
-  return (
-    <div className="App">
-      <Dashboard /> 
-    </div>
-  );
-}
+const App: React.FC = () => {
+    return <AppRoutes />;
+};
 
 export default App;

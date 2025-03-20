@@ -1,44 +1,53 @@
 import React from 'react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface PaginationProps {
-    totalPlayers: number;
-    playersPerPage: number;
+    totalItems: number;
+    itemsPerPage: number;
     currentPage: number;
-    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+    setCurrentPage: (page: number) => void;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ totalPlayers, playersPerPage, currentPage, setCurrentPage }) => {
-    const pageNumbers = [];
-    for (let i = 1; i <= Math.ceil(totalPlayers / playersPerPage); i++) {
-        pageNumbers.push(i);
-    }
+const Pagination: React.FC<PaginationProps> = ({
+    totalItems,
+    itemsPerPage,
+    currentPage,
+    setCurrentPage,
+}) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+    if (totalPages <= 1) return null;
 
     return (
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center items-center gap-4 mt-6">
             <button
-                onClick={() => paginate(currentPage - 1)}
+                onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-4 py-2 text-white bg-gray-700 rounded-lg mr-2"
+                title="Anterior"
+                className={`px-3 py-1 rounded transition-colors ${
+                    currentPage === 1
+                        ? 'bg-gray-600 cursor-not-allowed'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                }`}
             >
-                &laquo; Anterior
+                <FaChevronLeft />
             </button>
-            {pageNumbers.map((number) => (
-                <button
-                    key={number}
-                    onClick={() => paginate(number)}
-                    className={`px-4 py-2 text-white ${currentPage === number ? 'bg-green-500' : 'bg-gray-600'} rounded-lg mr-2`}
-                >
-                    {number}
-                </button>
-            ))}
+            
+            <span className="text-lg font-medium">
+                {currentPage}
+            </span>
+
             <button
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === pageNumbers.length}
-                className="px-4 py-2 text-white bg-gray-700 rounded-lg ml-2"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                title="Próximo"
+                className={`px-3 py-1 rounded transition-colors ${
+                    currentPage === totalPages
+                        ? 'bg-gray-600 cursor-not-allowed'
+                        : 'bg-gray-700 hover:bg-gray-600'
+                }`}
             >
-                Próximo &raquo;
+                <FaChevronRight />
             </button>
         </div>
     );

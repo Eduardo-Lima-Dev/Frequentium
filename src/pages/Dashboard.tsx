@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import PlayerTable from '../components/PlayerTable';
 import AddPlayerModal from '../components/AddPlayerModal';
@@ -6,6 +7,7 @@ import UploadJsonModal from '../components/UploadJsonModal';
 import Pagination from '../components/Pagination';
 import { findAllPlayers, createManyPlayers } from '../services/api/playerService';
 import toast, { Toaster } from 'react-hot-toast';
+import { FaGamepad, FaUserPlus, FaFileUpload } from 'react-icons/fa';
 
 const Dashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -123,24 +125,7 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="bg-gray-900 text-white min-h-screen">
-            <Toaster 
-                position="top-right"
-                toastOptions={{
-                    success: {
-                        style: {
-                            background: '#059669',
-                            color: 'white',
-                        },
-                    },
-                    error: {
-                        style: {
-                            background: '#DC2626',
-                            color: 'white',
-                        },
-                    },
-                    duration: 3000,
-                }}
-            />
+            <Toaster position="top-right" />
             <Header />
             <div className="p-6 text-center">
                 <h1 className="text-4xl mb-4">Frequências Meu Racha</h1>
@@ -149,16 +134,25 @@ const Dashboard: React.FC = () => {
                 <div className="flex flex-wrap justify-center gap-4 mb-6">
                     <button
                         onClick={openModal}
-                        className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                        className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center gap-2"
                     >
+                        <FaUserPlus />
                         Adicionar Novo Jogador
                     </button>
                     <button
                         onClick={openUploadModal}
-                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center gap-2"
                     >
+                        <FaFileUpload />
                         Importar JSON
                     </button>
+                    <Link
+                        to="/jogos"
+                        className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition flex items-center gap-2"
+                    >
+                        <FaGamepad />
+                        Gerenciar Jogos
+                    </Link>
                 </div>
 
                 <PlayerTable 
@@ -169,8 +163,8 @@ const Dashboard: React.FC = () => {
                 />
 
                 <Pagination
-                    totalPlayers={players.length}
-                    playersPerPage={playersPerPage}
+                    totalItems={players.length}
+                    itemsPerPage={playersPerPage}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                 />
@@ -180,7 +174,14 @@ const Dashboard: React.FC = () => {
                 isOpen={isModalOpen}
                 closeModal={closeModal}
                 editingPlayer={editingPlayer}
-                onSuccess={fetchPlayers}
+                onSuccess={async () => {
+                    await fetchPlayers();
+                    if (editingPlayer) {
+                        toast.success('Jogador atualizado com sucesso!');
+                    } else {
+                        toast.success('Jogador adicionado com sucesso!');
+                    }
+                }}
             />
             
             <UploadJsonModal

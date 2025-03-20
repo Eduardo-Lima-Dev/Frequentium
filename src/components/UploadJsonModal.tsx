@@ -23,26 +23,23 @@ const UploadJsonModal: React.FC<UploadJsonModalProps> = ({ isOpen, closeModal, h
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-            <div className="bg-gray-800 p-6 rounded-lg relative">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl text-white">Upload de Arquivo JSON</h2>
-                    <button
-                        onClick={closeModal}
-                        className="text-white text-2xl ml-4"
-                    >
-                        <FaTimes />
-                    </button>
-                </div>
-
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md relative">
+                <button
+                    onClick={closeModal}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                >
+                    <FaTimes />
+                </button>
+                <h2 className="text-2xl mb-4">Upload de Arquivo JSON</h2>
                 <div
                     {...getRootProps()}
-                    className="border-4 border-dashed border-gray-500 p-6 text-center cursor-pointer"
+                    className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-gray-500 transition-colors"
                 >
                     <input {...getInputProps()} />
                     <p className="text-white">Arraste e solte um arquivo JSON aqui, ou clique para selecionar.</p>
                 </div>
-                <p className="text-gray-400 mt-4 text-center">Somente arquivos JSON são permitidos.</p>
+                <p className="text-gray-400 mt-4 text-center text-sm">Somente arquivos JSON são permitidos.</p>
             </div>
         </div>
     );
