@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt, FaClipboardList } from 'react-icons/fa';
 import { Game } from '../types/Game';
 import DeleteModal from './modals/DeleteModal';
-import ViewFrequencyModal from './modals/ViewFrequencyModal';
+import EditFrequencyModal from './modals/EditFrequencyModal';
+import { createFrequency, findAllFrequencies, deleteFrequency } from '../services/api/frequencyService';
+import { findPlayersByGameId } from '../services/api/playerService';
+import toast from 'react-hot-toast';
 
 interface GameTableProps {
     games: Game[];
     editGame: (game: Game) => void;
     handleDeleteClick: (game: Game) => void;
     isLoading: boolean;
+    onFrequencyUpdate: () => Promise<void>;
 }
 
-const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClick, isLoading }) => {
+const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClick, isLoading, onFrequencyUpdate }) => {
     const [gameToDelete, setGameToDelete] = useState<Game | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -42,6 +46,59 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
         const dateB = new Date(b.data);
         return dateB.getTime() - dateA.getTime();
     });
+
+    const handleSaveFrequencies = async (selectedPlayers: number[]) => {
+        try {
+            if (!selectedGame) return;
+            
+            console.log('Jogo selecionado:', selectedGame.id);
+            console.log('Jogadores selecionados:', selectedPlayers);
+            
+            // Buscar frequências existentes do jogo
+            const allFrequencies = await findAllFrequencies();
+            const gameFrequencies = allFrequencies.filter(freq => freq.jogoId === selectedGame.id);
+            const currentPlayerIds = gameFrequencies.map(freq => freq.jogadorId);
+            
+            console.log('Frequências existentes:', gameFrequencies);
+            console.log('IDs dos jogadores atuais:', currentPlayerIds);
+            
+            // Identificar jogadores a serem removidos e adicionados
+            const playersToRemove = currentPlayerIds.filter(id => !selectedPlayers.includes(id));
+            const playersToAdd = selectedPlayers.filter(id => !currentPlayerIds.includes(id));
+            
+            console.log('Jogadores a serem removidos:', playersToRemove);
+            console.log('Jogadores a serem adicionados:', playersToAdd);
+            
+            // Remover frequências dos jogadores desmarcados
+            const deletePromises = gameFrequencies
+                .filter(freq => playersToRemove.includes(freq.jogadorId))
+                .map(freq => {
+                    console.log('Deletando frequência:', freq.id, 'do jogador:', freq.jogadorId);
+                    return deleteFrequency(freq.id);
+                });
+            
+            // Adicionar frequências para novos jogadores selecionados
+            const createPromises = playersToAdd.map(playerId => {
+                console.log('Criando frequência para jogador:', playerId);
+                return createFrequency(selectedGame.id, playerId);
+            });
+            
+            // Executar todas as operações
+            await Promise.all([...deletePromises, ...createPromises]);
+            
+            // Atualizar a lista de jogadores na Dashboard
+            const event = new CustomEvent('updatePlayers');
+            window.dispatchEvent(event);
+            
+            await onFrequencyUpdate();
+            toast.success('Frequências atualizadas com sucesso!');
+            
+        } catch (error) {
+            console.error('Erro ao atualizar frequências:', error);
+            toast.error('Erro ao atualizar frequências');
+            throw error;
+        }
+    };
 
     return (
         <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-md w-full">
@@ -104,7 +161,7 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
                 itemType="jogo"
             />
 
-            <ViewFrequencyModal
+            <EditFrequencyModal
                 isOpen={isFrequencyModalOpen}
                 closeModal={() => {
                     setIsFrequencyModalOpen(false);
@@ -112,6 +169,7 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
                 }}
                 gameId={selectedGame?.id || 0}
                 gameDate={selectedGame?.data || ''}
+                onSave={handleSaveFrequencies}
             />
         </div>
     );

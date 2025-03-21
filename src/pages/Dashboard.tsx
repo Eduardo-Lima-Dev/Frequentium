@@ -109,6 +109,18 @@ const Dashboard: React.FC = () => {
 
     useEffect(() => {
         fetchPlayers();
+        
+        // Adicionar listener para atualizar jogadores quando houver mudanças nas frequências
+        const handleUpdatePlayers = () => {
+            fetchPlayers();
+        };
+        
+        window.addEventListener('updatePlayers', handleUpdatePlayers);
+        
+        // Cleanup
+        return () => {
+            window.removeEventListener('updatePlayers', handleUpdatePlayers);
+        };
     }, []);
 
     const indexOfLastPlayer = currentPage * playersPerPage;

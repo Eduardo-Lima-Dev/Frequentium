@@ -154,11 +154,17 @@ const GameDashboard: React.FC = () => {
                     </button>
                 </div>
 
-                <GameTable 
-                    games={currentGames} 
-                    editGame={editGame} 
+                <GameTable
+                    games={currentGames}
+                    editGame={editGame}
                     handleDeleteClick={handleDeleteClick}
                     isLoading={isLoading}
+                    onFrequencyUpdate={async () => {
+                        await fetchGames();
+                        // Atualizar a lista de jogadores na Dashboard
+                        const event = new CustomEvent('updatePlayers');
+                        window.dispatchEvent(event);
+                    }}
                 />
 
                 <Pagination

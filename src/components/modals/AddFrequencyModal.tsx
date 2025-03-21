@@ -128,8 +128,8 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                     <FaTimes />
                 </button>
                 <h2 className="text-2xl mb-4">Registrar Frequência</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-6">
+                <form onSubmit={handleSubmit} className="flex flex-col items-center"> {/* Adicionado flex e items-center */}
+                    <div className="mb-6 w-full"> {/* Adicionado w-full */}
                         <label className="block text-sm font-medium mb-2">
                             Data do Jogo
                         </label>
@@ -151,11 +151,11 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                         </select>
                     </div>
 
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium mb-2">
-                            Jogadores
-                        </label>
-                        <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto mb-6 w-full"> {/* Adicionado w-full */}
+                        <div className="text-gray-400 mb-2 text-center"> {/* Adicionado text-center */}
+                            Jogadores selecionados: {selectedPlayers.length} de {players.length}
+                        </div>
+                        <div className="space-y-2">
                             {isLoadingData ? (
                                 <div className="flex justify-center items-center h-32">
                                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
@@ -163,7 +163,7 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                                 </div>
                             ) : (
                                 players.map((player) => (
-                                    <div key={player.id} className="flex items-center gap-2">
+                                    <div key={player.id} className="flex items-center gap-2 p-2 bg-gray-700 rounded">
                                         <input
                                             type="checkbox"
                                             id={`player-${player.id}`}
@@ -171,7 +171,10 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                                             onChange={() => handlePlayerToggle(player.id)}
                                             className="rounded text-blue-500 focus:ring-blue-500"
                                         />
-                                        <label htmlFor={`player-${player.id}`} className="text-white">
+                                        <label 
+                                            htmlFor={`player-${player.id}`} 
+                                            className="text-white flex-grow text-center" // Adicionado text-center
+                                        >
                                             {player.name} - {player.registrationNumber}
                                         </label>
                                     </div>
@@ -180,7 +183,7 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-4">
+                    <div className="flex justify-end gap-4 w-full"> {/* Adicionado w-full */}
                         <button
                             type="button"
                             onClick={closeModal}
@@ -203,4 +206,4 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
     );
 };
 
-export default AddFrequencyModal; 
+export default AddFrequencyModal;

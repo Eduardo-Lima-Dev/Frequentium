@@ -98,5 +98,13 @@ Content-Type: application/json
 ###
 
 # Teste DELETE /frequencia/{id} (Excluir uma frequência)
-DELETE http://localhost:3000/frequencia/4
+DELETE http://localhost:3000/frequencia/32
 Accept: application/json
+
+###
+
+# Teste GET /frequencia/jogador/{id} (Obter frequências por jogador)
+GET http://localhost:3000/frequencia/jogador/5
+Accept: application/json
+
+

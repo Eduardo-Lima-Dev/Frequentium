@@ -18,6 +18,17 @@ export const findAllPlayers = async (): Promise<Player[]> => {
     }));
 };
 
+export const findPlayersByGameId = async (gameId: number): Promise<Player[]> => {
+    const response = await api.get<PlayerResponse[]>(`/jogadores/jogo/${gameId}`);
+    const data = Array.isArray(response.data) ? response.data : [];
+    return data.map(player => ({
+        id: player.id,
+        name: player.nome,
+        registrationNumber: player.matricula,
+        horas: Number(player.horas) || 0
+    }));
+};
+
 export const findPlayerById = async (id: number): Promise<Player> => {
     const response = await api.get<PlayerResponse>(`/jogadores/${id}`);
     return {
