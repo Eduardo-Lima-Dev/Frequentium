@@ -43,7 +43,6 @@ const Dashboard: React.FC = () => {
                 
                 const players = JSON.parse(fileContent);
                 console.log('Dados do JSON parseados:', players);
-                console.log('Quantidade de jogadores no JSON:', players.length);
                 
                 if (!Array.isArray(players)) {
                     toast.error('O arquivo JSON deve conter um array de jogadores');
@@ -51,12 +50,18 @@ const Dashboard: React.FC = () => {
                 }
 
                 const isValidFormat = players.every(player => 
-                    player.nome && 
-                    (player.matricula || player.matricula === 0)
+                    typeof player === 'object' && 
+                    player !== null &&
+                    typeof player.nome === 'string' && 
+                    player.nome.trim() !== '' &&
+                    (
+                        typeof player.matricula === 'string' || 
+                        typeof player.matricula === 'number'
+                    )
                 );
 
                 if (!isValidFormat) {
-                    toast.error('Formato inválido. Cada jogador deve ter nome e matrícula');
+                    toast.error('Formato inválido. Cada jogador deve ter nome (string) e matrícula (string ou número)');
                     return;
                 }
 
@@ -67,8 +72,6 @@ const Dashboard: React.FC = () => {
                     await fetchPlayers();
                     closeUploadModal();
                     toast.success(`${result.length} jogadores foram adicionados com sucesso!`);
-                } else {
-                    toast.error('Erro ao adicionar jogadores. Verifique o console para mais detalhes.');
                 }
             } catch (error) {
                 console.error('Erro ao processar o arquivo JSON ou criar jogadores:', error);

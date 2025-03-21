@@ -91,7 +91,7 @@ const GameDashboard: React.FC = () => {
         try {
 
             const frequencies = await findAllFrequencies();
-            const hasFrequencies = frequencies.some(freq => freq.jogoId === id);
+            const hasFrequencies = frequencies.some(freq => freq.jogo_id === id);
 
             if (hasFrequencies) {
                 toast.error('Não é possível excluir este jogo pois existem frequências vinculadas a ele.');

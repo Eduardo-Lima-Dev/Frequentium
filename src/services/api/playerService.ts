@@ -8,6 +8,10 @@ interface PlayerResponse {
     horas?: number;
 }
 
+interface CreateManyPlayersResponse {
+    resultados: PlayerResponse[];
+}
+
 export const findAllPlayers = async (): Promise<Player[]> => {
     const response = await api.get<PlayerResponse[]>('/jogadores');
     return response.data.map(player => ({
@@ -71,12 +75,12 @@ export const deletePlayer = async (id: number): Promise<void> => {
 };
 
 export const createManyPlayers = async (players: { nome: string; matricula: string }[]): Promise<Player[]> => {
-    const response = await api.post<PlayerResponse[]>('/jogadores/batch', players);
-    return response.data.map(player => ({
+    const response = await api.post<CreateManyPlayersResponse>('/jogadores', players);
+    console.log('Resposta:', response);
+    return response.data.resultados.map(player => ({
         id: player.id,
         name: player.nome,
         registrationNumber: player.matricula,
         horas: Number(player.horas) || 0
     }));
 };
-

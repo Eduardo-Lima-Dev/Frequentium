@@ -1,5 +1,5 @@
 export interface Frequency {
     id: number;
-    jogoId: number;
-    jogadorId: number;
+    jogo_id: number;
+    jogador_id: number;
 } 

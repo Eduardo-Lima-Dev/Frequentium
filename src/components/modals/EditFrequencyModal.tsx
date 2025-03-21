@@ -4,6 +4,7 @@ import { findAllPlayers } from '../../services/api/playerService';
 import { findPlayersByGameId } from '../../services/api/gameService';
 import toast from 'react-hot-toast';
 import { Player } from '../../types/Player';
+import { findAllFrequencies, deleteFrequency } from '../../services/api/frequencyService';
 
 interface EditFrequencyModalProps {
     isOpen: boolean;
@@ -30,16 +31,14 @@ const EditFrequencyModal: React.FC<EditFrequencyModalProps> = ({
             const fetchData = async () => {
                 setLoading(true);
                 try {
-                    // Buscar todos os jogadores e os jogadores do jogo específico
+
                     const [allPlayers, playersWithFrequency] = await Promise.all([
                         findAllPlayers(),
                         findPlayersByGameId(gameId)
                     ]);
 
-                    // Obter IDs dos jogadores que têm frequência neste jogo
                     const playerIdsWithFrequency = playersWithFrequency.map(player => player.id);
 
-                    // Ordenar jogadores por nome
                     const sortedPlayers = [...allPlayers].sort((a, b) => 
                         a.name.localeCompare(b.name, 'pt-BR')
                     );
@@ -70,7 +69,19 @@ const EditFrequencyModal: React.FC<EditFrequencyModalProps> = ({
     const handleSubmit = async () => {
         setIsSaving(true);
         try {
+
+            const frequencies = await findAllFrequencies();
+
+            const gameFrequencies = frequencies.filter(freq => freq.jogo_id == gameId);
+
+            for (const freq of gameFrequencies) {
+                if (!selectedPlayers.includes(freq.jogador_id)) {
+                    await deleteFrequency(freq.id);
+                }
+            }
+
             await onSave(selectedPlayers);
+            
             toast.success('Frequências atualizadas com sucesso!');
             closeModal();
         } catch (error) {

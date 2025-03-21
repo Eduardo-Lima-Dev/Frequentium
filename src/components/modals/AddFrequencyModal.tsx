@@ -50,12 +50,16 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                     });
 
                     setGames(sortedGames);
-                    setFrequencies(frequenciesData);
+                    const mappedFrequencies = frequenciesData.map(freq => ({
+                        jogoId: freq.jogo_id,
+                        jogadorId: freq.jogador_id
+                    }));
+                    setFrequencies(mappedFrequencies);
 
                     if (sortedGames.length > 0) {
                         const mostRecentGameId = sortedGames[0].id;
                         setSelectedGameId(mostRecentGameId);
-                        updateSelectedPlayers(mostRecentGameId, frequenciesData);
+                        updateSelectedPlayers(mostRecentGameId, mappedFrequencies);
                     }
 
                     const sortedPlayers = [...playersData].sort((a, b) => 
