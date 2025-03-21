@@ -24,7 +24,6 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
 
     useEffect(() => {
         if (editingGame) {
-            // Formatar a data para o formato YYYY-MM-DD
             const gameDate = new Date(editingGame.data);
             const formattedDate = gameDate.toISOString().split('T')[0];
             setData(formattedDate);

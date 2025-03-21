@@ -173,7 +173,7 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                                         />
                                         <label 
                                             htmlFor={`player-${player.id}`} 
-                                            className="text-white flex-grow text-center" // Adicionado text-center
+                                            className="text-white flex-grow text-center"
                                         >
                                             {player.name} - {player.registrationNumber}
                                         </label>
@@ -183,7 +183,7 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-4 w-full"> {/* Adicionado w-full */}
+                    <div className="flex justify-end gap-4 w-full"> 
                         <button
                             type="button"
                             onClick={closeModal}

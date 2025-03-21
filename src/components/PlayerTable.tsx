@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import { deletePlayer } from '../services/api/playerService';
+import { findAllFrequencies } from '../services/api/frequencyService';
 import DeleteModal from './modals/DeleteModal';
 import { Player } from '../types/Player';
 import toast from 'react-hot-toast';
@@ -23,16 +24,31 @@ const PlayerTable: React.FC<PlayerTableProps> = ({ players, editPlayer, setPlaye
 
     const handleDelete = async (playerId: number) => {
         try {
+
+            const frequencies = await findAllFrequencies();
+            const hasFrequencies = frequencies.some(freq => freq.jogador_id == playerId);
+
+            const player = players.find(p => p.id == playerId);
+            const hasHours = player && player.horas > 0;
+
+            if (hasFrequencies || hasHours) {
+                toast.error('Não é possível excluir este jogador pois ele possui frequências registradas.');
+                setIsModalOpen(false);
+                setPlayerToDelete(null);
+                return;
+            }
+
             await deletePlayer(playerId);
             setPlayers(prevPlayers => prevPlayers.filter(player => player.id !== playerId));
             toast.success('Jogador excluído com sucesso!');
+            setIsModalOpen(false);
+            setPlayerToDelete(null);
         } catch (error) {
             console.error('Erro ao excluir jogador', error);
             toast.error('Erro ao excluir jogador');
         } 
     };
 
-    // Ordenar os jogadores por nome
     const sortedPlayers = [...players].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
     if (isLoading) {

@@ -99,7 +99,6 @@ const Dashboard: React.FC = () => {
         setIsLoading(true);
         try {
             const data = await findAllPlayers();
-            // Ordenar os jogadores por nome
             const sortedPlayers = data.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
             setPlayers(sortedPlayers);
         } catch (error) {
@@ -112,15 +111,13 @@ const Dashboard: React.FC = () => {
 
     useEffect(() => {
         fetchPlayers();
-        
-        // Adicionar listener para atualizar jogadores quando houver mudanças nas frequências
+    
         const handleUpdatePlayers = () => {
             fetchPlayers();
         };
         
         window.addEventListener('updatePlayers', handleUpdatePlayers);
         
-        // Cleanup
         return () => {
             window.removeEventListener('updatePlayers', handleUpdatePlayers);
         };

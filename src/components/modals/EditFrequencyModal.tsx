@@ -82,7 +82,6 @@ const EditFrequencyModal: React.FC<EditFrequencyModalProps> = ({
 
             await onSave(selectedPlayers);
             
-            toast.success('Frequências atualizadas com sucesso!');
             closeModal();
         } catch (error) {
             console.error('Erro ao salvar frequências:', error);

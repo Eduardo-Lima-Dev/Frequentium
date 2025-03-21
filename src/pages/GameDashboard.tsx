@@ -74,7 +74,6 @@ const GameDashboard: React.FC = () => {
             if (updatedGame) {
                 await fetchGames();
                 closeModal();
-                toast.success('Jogo atualizado com sucesso!');
             }
         } catch (error) {
             console.error('Erro ao atualizar jogo', error);
@@ -89,7 +88,6 @@ const GameDashboard: React.FC = () => {
 
     const handleDelete = async (id: number) => {
         try {
-
             const frequencies = await findAllFrequencies();
             const hasFrequencies = frequencies.some(freq => freq.jogo_id === id);
 
