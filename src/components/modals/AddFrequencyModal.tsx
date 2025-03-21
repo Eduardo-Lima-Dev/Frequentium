@@ -26,7 +26,6 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [frequencies, setFrequencies] = useState<{ jogoId: number; jogadorId: number }[]>([]);
 
-    // Função para buscar e marcar os jogadores com frequência
     const updateSelectedPlayers = (gameId: number, frequenciesData: { jogoId: number; jogadorId: number }[]) => {
         const playersWithFrequency = frequenciesData
             .filter(freq => freq.jogoId === gameId)
@@ -46,15 +45,13 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                         findAllFrequencies()
                     ]);
 
-                    // Ordenar jogos por data (do mais recente para o mais antigo)
                     const sortedGames = [...gamesData].sort((a, b) => {
                         return new Date(b.data).getTime() - new Date(a.data).getTime();
                     });
 
                     setGames(sortedGames);
                     setFrequencies(frequenciesData);
-                    
-                    // Definir o jogo mais recente como selecionado
+
                     if (sortedGames.length > 0) {
                         const mostRecentGameId = sortedGames[0].id;
                         setSelectedGameId(mostRecentGameId);
@@ -76,7 +73,6 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
         }
     }, [isOpen]);
 
-    // Atualizar seleção de jogadores quando mudar o jogo
     const handleGameChange = (gameId: number) => {
         console.log('Jogo selecionado:', gameId);
         setSelectedGameId(gameId);
@@ -128,8 +124,8 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                     <FaTimes />
                 </button>
                 <h2 className="text-2xl mb-4">Registrar Frequência</h2>
-                <form onSubmit={handleSubmit} className="flex flex-col items-center"> {/* Adicionado flex e items-center */}
-                    <div className="mb-6 w-full"> {/* Adicionado w-full */}
+                <form onSubmit={handleSubmit} className="flex flex-col items-center"> 
+                    <div className="mb-6 w-full"> 
                         <label className="block text-sm font-medium mb-2">
                             Data do Jogo
                         </label>
@@ -151,8 +147,8 @@ const AddFrequencyModal: React.FC<AddFrequencyModalProps> = ({
                         </select>
                     </div>
 
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto mb-6 w-full"> {/* Adicionado w-full */}
-                        <div className="text-gray-400 mb-2 text-center"> {/* Adicionado text-center */}
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto mb-6 w-full">
+                        <div className="text-gray-400 mb-2 text-center">
                             Jogadores selecionados: {selectedPlayers.length} de {players.length}
                         </div>
                         <div className="space-y-2">

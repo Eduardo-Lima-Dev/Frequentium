@@ -79,3 +79,4 @@ export const createManyPlayers = async (players: { nome: string; matricula: stri
         horas: Number(player.horas) || 0
     }));
 };
+

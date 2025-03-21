@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { findAllPlayers } from '../../services/api/playerService';
-import { findAllFrequencies } from '../../services/api/frequencyService';
+import { findPlayersByGameId } from '../../services/api/gameService';
 import toast from 'react-hot-toast';
 import { Player } from '../../types/Player';
 
@@ -30,30 +30,23 @@ const EditFrequencyModal: React.FC<EditFrequencyModalProps> = ({
             const fetchData = async () => {
                 setLoading(true);
                 try {
-                    console.log('Buscando dados para o jogo:', gameId);
-                    // Buscar todos os jogadores e frequências
-                    const [allPlayers, frequencies] = await Promise.all([
+                    // Buscar todos os jogadores e os jogadores do jogo específico
+                    const [allPlayers, playersWithFrequency] = await Promise.all([
                         findAllPlayers(),
-                        findAllFrequencies()
+                        findPlayersByGameId(gameId)
                     ]);
 
-                    // Filtrar frequências apenas do jogo atual
-                    const gameFrequencies = frequencies.filter(freq => freq.jogoId === gameId);
-                    
-                    // Pegar os IDs dos jogadores que têm frequência neste jogo
-                    const playerIdsWithFrequency = gameFrequencies.map(freq => freq.jogadorId);
-
-                    console.log('Jogadores do jogo:', gameFrequencies);
-                    console.log('Todos os jogadores:', allPlayers);
+                    // Obter IDs dos jogadores que têm frequência neste jogo
+                    const playerIdsWithFrequency = playersWithFrequency.map(player => player.id);
 
                     // Ordenar jogadores por nome
                     const sortedPlayers = [...allPlayers].sort((a, b) => 
                         a.name.localeCompare(b.name, 'pt-BR')
                     );
+                    
                     setPlayers(sortedPlayers);
-
-                    console.log('IDs dos jogadores com frequência:', playerIdsWithFrequency);
                     setSelectedPlayers(playerIdsWithFrequency);
+                    
                 } catch (error) {
                     console.error('Erro ao carregar dados:', error);
                     toast.error('Erro ao carregar dados');
@@ -77,7 +70,6 @@ const EditFrequencyModal: React.FC<EditFrequencyModalProps> = ({
     const handleSubmit = async () => {
         setIsSaving(true);
         try {
-            // Envia todos os jogadores selecionados
             await onSave(selectedPlayers);
             toast.success('Frequências atualizadas com sucesso!');
             closeModal();

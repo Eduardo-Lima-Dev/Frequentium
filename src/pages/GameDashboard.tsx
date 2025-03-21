@@ -89,7 +89,7 @@ const GameDashboard: React.FC = () => {
 
     const handleDelete = async (id: number) => {
         try {
-            // Verifica se existem frequências vinculadas ao jogo
+
             const frequencies = await findAllFrequencies();
             const hasFrequencies = frequencies.some(freq => freq.jogoId === id);
 
@@ -161,7 +161,6 @@ const GameDashboard: React.FC = () => {
                     isLoading={isLoading}
                     onFrequencyUpdate={async () => {
                         await fetchGames();
-                        // Atualizar a lista de jogadores na Dashboard
                         const event = new CustomEvent('updatePlayers');
                         window.dispatchEvent(event);
                     }}

@@ -52,3 +52,13 @@ export const updateGame = async (id: number, data: string, duracao: number): Pro
 export const deleteGame = async (id: number): Promise<void> => {
     await api.delete(`/jogos/${id}`);
 };
+
+export const findPlayersByGameId = async (id: number): Promise<Game[]> => {
+    const response = await api.get<GameResponse[]>(`/jogadores/jogo/${id}`);
+    const data = Array.isArray(response.data) ? response.data : [];
+    return data.map(game => ({
+        id: game.id,
+        data: game.data,
+        duracao: game.duracao
+    }));
+};
