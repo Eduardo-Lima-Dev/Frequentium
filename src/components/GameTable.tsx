@@ -3,7 +3,12 @@ import { FaEdit, FaTrashAlt, FaClipboardList } from 'react-icons/fa';
 import { Game } from '../types/Game';
 import DeleteModal from './modals/DeleteModal';
 import EditFrequencyModal from './modals/EditFrequencyModal';
-import { createFrequency, findAllFrequencies, deleteFrequency, findFrequenciesByGameId } from '../services/api/frequencyService';
+import { 
+    createFrequency, 
+    findAllFrequencies, 
+    deleteFrequency, 
+    findFrequenciesByGameId 
+} from '../services/api/frequencyService';
 import toast from 'react-hot-toast';
 
 interface GameTableProps {
