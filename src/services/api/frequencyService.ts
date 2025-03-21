@@ -22,3 +22,8 @@ export const createFrequency = async (jogoId: number, jogadorId: number): Promis
 export const deleteFrequency = async (id: number): Promise<void> => {
     await api.delete(`/frequencia/${id}`);
 }; 
+
+export const findFrequenciesByGameId = async (gameId: number): Promise<Frequency[]> => {
+    const response = await api.get(`/frequencia`);
+    return response.data.filter((freq: Frequency) => freq.jogo_id == gameId);
+};

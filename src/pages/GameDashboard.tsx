@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { findAllGames, createGame, updateGame, deleteGame } from '../services/api/gameService';
-import { findAllFrequencies } from '../services/api/frequencyService';
+import { findFrequenciesByGameId } from '../services/api/frequencyService';
 import GameTable from '../components/GameTable';
 import AddGameModal from '../components/modals/AddGameModal';
 import AddFrequencyModal from '../components/modals/AddFrequencyModal';
@@ -88,8 +88,8 @@ const GameDashboard: React.FC = () => {
 
     const handleDelete = async (id: number) => {
         try {
-            const frequencies = await findAllFrequencies();
-            const hasFrequencies = frequencies.some(freq => freq.jogo_id === id);
+            const frequencies = await findFrequenciesByGameId(id);
+            const hasFrequencies = frequencies && frequencies.length > 0;
 
             if (hasFrequencies) {
                 toast.error('Não é possível excluir este jogo pois existem frequências vinculadas a ele.');

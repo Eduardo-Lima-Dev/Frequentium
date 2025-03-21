@@ -3,7 +3,7 @@ import { FaEdit, FaTrashAlt, FaClipboardList } from 'react-icons/fa';
 import { Game } from '../types/Game';
 import DeleteModal from './modals/DeleteModal';
 import EditFrequencyModal from './modals/EditFrequencyModal';
-import { createFrequency, findAllFrequencies, deleteFrequency } from '../services/api/frequencyService';
+import { createFrequency, findAllFrequencies, deleteFrequency, findFrequenciesByGameId } from '../services/api/frequencyService';
 import toast from 'react-hot-toast';
 
 interface GameTableProps {
@@ -31,11 +31,11 @@ const GameTable: React.FC<GameTableProps> = ({ games, editGame, handleDeleteClic
 
     const openDeleteModal = async (game: Game) => {
         try {
-            const frequencies = await findAllFrequencies();
-            const hasFrequencies = frequencies.some(freq => freq.jogo_id === game.id);
+            const frequencies = await findFrequenciesByGameId(game.id);
+            const hasFrequencies = frequencies && frequencies.length > 0;
 
             if (hasFrequencies) {
-                toast.error('Não é possível excluir este jogo pois ele possui frequências registradas.');
+                toast.error('Não é possível excluir este jogo pois existem frequências vinculadas a ele.');
                 return;
             }
 
